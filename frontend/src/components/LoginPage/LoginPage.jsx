@@ -1,16 +1,16 @@
 import "./LoginPage.css"
-import Header from "../Header/Header";
 import LoginForm from "../LoginForm/LoginForm"
 
 function LoginPage () {
     return (
         <>
-            <Header />
-            <main>
+            <div id="main-container">
                 <LoginForm />
-
-                <img src="https://placehold.co/100x100" />
-            </main>
+                <div>
+                    <img src="https://placehold.co/100x100" alt="logo"/>
+                    <h1>ShareCal</h1>
+                </div>
+            </div>
 
         </>
     )

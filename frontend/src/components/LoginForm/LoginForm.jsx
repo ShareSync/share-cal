@@ -1,4 +1,6 @@
 import "./LoginForm.css"
+import { Link } from 'react-router-dom';
+
 
 function LoginForm (){
     return(
@@ -10,6 +12,7 @@ function LoginForm (){
                 <p>Password</p>
                 <input type="password" />
                 <button>Login</button>
+                <p>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
             </form>
         </div>
     )
