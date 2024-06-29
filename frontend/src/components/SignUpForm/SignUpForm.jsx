@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./SignUpForm.css"
-import { Link } from 'react-router-dom';
+import { UserContext } from '../../UserContext.js';
+import { useNavigate, Link} from 'react-router-dom';
 
 function SignUpForm (){
     const [email, setEmail] = useState("");
@@ -8,7 +9,10 @@ function SignUpForm (){
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
 
-    function handleOnSubmit (event) {
+    // const { updateUser } = useContext(UserContext);
+    const navigate = useNavigate();
+
+    const handleOnSubmit = async (event) => {
         event.preventDefault();
         event.stopPropagation();
         const userObj = {
@@ -17,7 +21,45 @@ function SignUpForm (){
             email: email,
             password: password
         }
-        console.log("User Info: ", userObj);
+
+        try {
+          // Make the signup API request
+          const response = await fetch(`http://localhost:3000/users`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userObj),
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            // const loggedInUser = data.user;
+
+            console.log('Signup successful');
+
+            // Reset form fields
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setPassword('');
+
+            // Update the user context
+            // updateUser(loggedInUser);
+
+            // Navigate to the home page after successful login
+            navigate('/');
+          } else {
+            // Handle signup failure case
+            alert('Signup failed');
+          }
+        } catch (error) {
+          // Handle any network or API request errors
+          alert('Signup failed: ' + error);
+        }
+
+        // console.log("User Info: ", userObj);
     }
     return(
         <div id="login-form">
