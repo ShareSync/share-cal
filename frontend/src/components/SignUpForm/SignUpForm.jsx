@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import "./SignUpForm.css"
 import { UserContext } from '../../UserContext.js';
 import { useNavigate, Link} from 'react-router-dom';
@@ -9,7 +9,7 @@ function SignUpForm (){
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
 
-    // const { updateUser } = useContext(UserContext);
+    const { updateUser } = useContext(UserContext);
     const navigate = useNavigate();
 
     const handleOnSubmit = async (event) => {
@@ -35,7 +35,7 @@ function SignUpForm (){
 
           if (response.ok) {
             const data = await response.json();
-            // const loggedInUser = data.user;
+            const loggedInUser = data.user;
 
             console.log('Signup successful');
 
@@ -46,7 +46,7 @@ function SignUpForm (){
             setPassword('');
 
             // Update the user context
-            // updateUser(loggedInUser);
+            updateUser(loggedInUser);
 
             // Navigate to the home page after successful login
             navigate('/');
