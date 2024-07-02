@@ -37,8 +37,6 @@ function SignUpForm (){
             const data = await response.json();
             const loggedInUser = data.user;
 
-            console.log('Signup successful');
-
             // Reset form fields
             setFirstName('');
             setLastName('');
@@ -59,7 +57,6 @@ function SignUpForm (){
           alert('Signup failed: ' + error);
         }
 
-        // console.log("User Info: ", userObj);
     }
     return(
         <div id="login-form">

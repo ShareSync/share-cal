@@ -43,7 +43,7 @@ function LoginForm (){
             const { user } = data;
 
             updateUser(user);
-            navigate('/user/5/calendar');
+            navigate('/');
             alert("Successfully Logged In");
           } catch (error) {
             console.error('Error logging in:', error.message);
@@ -59,9 +59,9 @@ function LoginForm (){
             <form>
                 <h1>Login</h1>
                 <p>Email Address</p>
-                <input type="email" placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
+                <input type="email" required placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
                 <p>Password</p>
-                <input type="password" onChange={(e) => setPassword(e.target.value)} value={password}/>
+                <input type="password" required onChange={(e) => setPassword(e.target.value)} value={password}/>
                 <button onClick={(e) => handleOnSubmit(e)}>Login</button>
                 <p>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
             </form>
