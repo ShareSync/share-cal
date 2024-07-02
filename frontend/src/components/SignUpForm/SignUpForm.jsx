@@ -49,7 +49,7 @@ function SignUpForm (){
             updateUser(loggedInUser);
 
             // Navigate to the home page after successful login
-            navigate('/login');
+            navigate('/');
           } else {
             // Handle signup failure case
             alert('Signup failed');
