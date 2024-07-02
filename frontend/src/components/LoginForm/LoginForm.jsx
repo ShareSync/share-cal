@@ -1,21 +1,58 @@
 import "./LoginForm.css"
-import { Link } from 'react-router-dom';
-import { useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
+import { UserContext } from '../../UserContext.js';
+import { useState, useContext } from "react";
 
 
 function LoginForm (){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { updateUser } = useContext(UserContext);
+    const navigate = useNavigate()
 
-    function handleOnSubmit (event) {
+
+    const userObj = {
+        email: "",
+        password: ""
+    }
+    const handleOnSubmit = async (event)  => {
         event.preventDefault();
-        event.stopPropagation();
-        const userObj = {
+        if (email && password) {
+          const userObj = {
             email: email,
             password: password
+          };
+
+          console.log(userObj);
+
+          try {
+            const response = await fetch('http://localhost:3000/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(userObj),
+              credentials: 'include'
+            });
+
+            if (!response.ok) {
+              throw new Error('Login failed');
+            }
+
+            const data = await response.json();
+            const { user } = data;
+
+            updateUser(user);
+            navigate('/user/5/calendar');
+            alert("Successfully Logged In");
+          } catch (error) {
+            console.error('Error logging in:', error.message);
+            alert("Unsuccessful login attempt. Try again.");
+          }
+        } else {
+          alert("Please fill out all fields");
         }
-        console.log("User Info: ", userObj);
-    }
+      };
 
     return(
         <div id="login-form">
