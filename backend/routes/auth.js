@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient();
 require('dotenv').config()
 
+const emailValidator = require("email-validator");
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -29,9 +30,13 @@ const authenticateToken = (req, res, next) => {
 
 // Definition of the routes for user registration, logining in and logging out
 // User Registration/Sign Up
-router.post('/users', async (req, res) => {
+router.post('/registration', async (req, res) => {
     const {email, password, firstName, lastName} = req.body;
     try {
+      // Validate the email format
+      if (!emailValidator.validate(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
       // Check if email already exists
       const existingUser = await prisma.user.findFirst({
         where: { email }

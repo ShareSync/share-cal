@@ -10,11 +10,6 @@ function LoginForm (){
     const { updateUser } = useContext(UserContext);
     const navigate = useNavigate()
 
-
-    const userObj = {
-        email: "",
-        password: ""
-    }
     const handleOnSubmit = async (event)  => {
         event.preventDefault();
         if (email && password) {
@@ -23,10 +18,8 @@ function LoginForm (){
             password: password
           };
 
-          console.log(userObj);
-
           try {
-            const response = await fetch('http://localhost:3000/login', {
+            const response = await fetch('http://localhost:3000/auth/login', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -44,7 +37,6 @@ function LoginForm (){
 
             updateUser(user);
             navigate('/');
-            alert("Successfully Logged In");
           } catch (error) {
             console.error('Error logging in:', error.message);
             alert("Unsuccessful login attempt. Try again.");

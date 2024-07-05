@@ -1,31 +1,25 @@
 import "./Header.css"
 import { useState, useContext } from "react";
 import { UserContext } from '../../UserContext.js';
+import { logout } from "../../utils/utils.js"
 
 function Header () {
     const { updateUser } = useContext(UserContext);
 
-    const handleOnLogout = async (event) => {
+    const handleOnLogout = async () => {
         try {
-            await fetch(`http://localhost:3000/logout`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
-            });
-
+            logout();
             updateUser(null);
         } catch (error) {
-            console.error('Error logging out:', error.message);
+            alert('Error logging out:', error.message);
         }
     }
 
     return (
         <div id ="header">
-            <img src="https://placehold.co/100x100" alt="logo" />
+            <img id="app-logo" src="/logo.jpg" alt="logo" />
             <h1>ShareCal</h1>
-            <button onClick={handleOnLogout}>Log out</button>
+            <button onClick={() => handleOnLogout()}>Log out</button>
         </div>
     )
 }
