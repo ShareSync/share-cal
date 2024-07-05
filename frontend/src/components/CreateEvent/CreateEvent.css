@@ -16,7 +16,7 @@
     margin: 20% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 65%;
+    width: 50%;
     overflow: auto;
     display: flex;
     flex-direction: column;
@@ -32,6 +32,7 @@
 }
 
 #form-button {
+    margin-top: 10px;
     display: flex;
     justify-content: center;
     gap: 30px;
