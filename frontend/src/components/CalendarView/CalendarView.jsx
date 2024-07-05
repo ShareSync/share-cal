@@ -5,7 +5,6 @@ import { useState, useContext } from "react";
 
 function CalendarView () {
     const userInfo = useContext(UserContext).user;
-    console.log({userInfo});
     return (
             <>
                 <Header />

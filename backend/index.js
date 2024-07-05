@@ -7,7 +7,7 @@ const PORT = 3000
 const express = require('express');
 const cookieParser = require('cookie-parser')
 const cors = require('cors');
-const userRoutes = require('./routes/userAuth.js');
+const authRoute = require('./routes/auth.js');
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(userRoutes);
+app.use('/auth', authRoute);
 
 
 app.listen(PORT, () => {

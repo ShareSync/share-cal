@@ -1,7 +1,9 @@
 #header {
     display: flex;
     justify-content: center;
-    /* position: fixed;
-    top: 0;
-    left: 0; */
+}
+
+#app-logo {
+    width: 100px;
+    height: 100px;
 }
