@@ -1,7 +1,7 @@
 import "./CreateEvent.css"
 import { useState } from "react";
 
-function CreateEvent ({isOpen, onClose, onSubmit}) {
+function CreateEvent ({onClose, onSubmit}) {
     const [title, setTitle]  = useState('');;
     const [description, setDescription] = useState('');
     const [startDate, setStartDate] = useState('');

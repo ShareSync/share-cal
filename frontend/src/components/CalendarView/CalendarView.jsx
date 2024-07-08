@@ -9,13 +9,28 @@ function CalendarView () {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [events, setEvents] = useState([]);
+    const { updateUser } = useContext(UserContext);
 
     const handleEventSubmit = (eventData) => {
         setEvents([...events, eventData]);
         setIsModalOpen(false);
     }
-    useEffect(() => {
 
+    const fetchCurrentUser = async () => {
+        try {
+          const response = await fetch('http://localhost:3000/auth/current', { credentials: 'include' });
+          const data = await response.json();
+          updateUser(data.user);
+        } catch (error) {
+          console.error('Failed to fetch current user', error);
+          if (error.response && error.response.status === 401 ) {
+            updateUser(null);
+          }
+        }
+      };
+
+    useEffect(() => {
+        fetchCurrentUser();
       }, [events]);
     return (
             <>
