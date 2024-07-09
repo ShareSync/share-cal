@@ -69,6 +69,7 @@ function CalendarView () {
           <p>Description: {calEvent.description}</p>
           <p>Start Time: {calEvent.startAt}</p>
           <p>End Time: {calEvent.endAt}</p>
+          <p>Location: {calEvent.location}</p>
         </>
       )
     })
