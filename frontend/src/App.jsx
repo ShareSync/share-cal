@@ -14,7 +14,6 @@ function App() {
   const [user, setUser] = useState(() => {
     // Retrieve the user data from storage or set it to null if not found
     const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
   });
 
   const updateUser = (newUser) => {
@@ -22,15 +21,13 @@ function App() {
   };
 
   useEffect(() => {
-    // Save the user data to storage whenever the user state changes
-    localStorage.setItem('user', JSON.stringify(user));
+
   }, [user]);
 
   return (
     <UserContext.Provider value={{ user, updateUser}}>
       <Router>
         <Routes>
-          {/* <Route path='/' element={<LoginPage />} /> */}
           <Route path="/" element={user ? <CalenderView />: <LoginPage />} />
           <Route path='/signup' element= {<SignUpPage />}/>
           <Route path='/user/:id/calendar' element={<CalenderView />}/>

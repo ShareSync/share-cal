@@ -8,6 +8,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser')
 const cors = require('cors');
 const authRoute = require('./routes/auth.js');
+const calendarRoute = require('./routes/calendarMgmt.js')
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(cors({
 }));
 
 app.use('/auth', authRoute);
+app.use('/calendar', calendarRoute);
 
 
 app.listen(PORT, () => {
