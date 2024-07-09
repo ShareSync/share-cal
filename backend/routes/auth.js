@@ -11,22 +11,7 @@ const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY
 
 //Middleware
-const authenticateToken = (req, res, next) => {
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.sendStatus(401);
-  }
-
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) {
-      return res.sendStatus(403);
-    }
-
-    req.user = user;
-    next();
-  });
-};
+const authenticateToken = require('../middlewares/authenticateToken');
 
 // Definition of the routes for user registration, logining in and logging out
 // User Registration/Sign Up
@@ -84,7 +69,7 @@ router.post('/login', async (req, res) => {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
-          maxAge: 3600000,
+          maxAge: 360000,
       });
 
       res.status(200).json({message:'Login Successsful', user})
