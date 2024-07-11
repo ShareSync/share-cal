@@ -3,6 +3,7 @@ import Header from "../Header/Header"
 import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import { UserContext } from '../../UserContext.js';
 import { useState, useContext, useEffect } from "react";
+import ICSUpload from "../ICSUpload/ICSUpload.jsx";
 
 function CalendarView () {
     const userInfo = useContext(UserContext).user;
@@ -72,11 +73,19 @@ function CalendarView () {
           <p>Location: {calEvent.location}</p>
         </>
       )
-    })
+    });
+
+    const handleParsedEvents = (parsedEvents) => {
+      parsedEvents.forEach(event => {
+        createCalendarEvent(event);
+      })
+    }
+
     return (
             <>
                 <Header />
                 <button onClick={() => setIsModalOpen(true)}>New Event</button>
+                <ICSUpload onEventsImported={handleParsedEvents}/>
                 <p>This is the Calendar View Page</p>
                 <p>Welcome {userInfo.firstName}</p>
                 <p>Here are the events on your calendar:</p>
