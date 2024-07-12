@@ -2,10 +2,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 require('dotenv').config();
 const express = require('express');
-const fs = require('fs');
-const ical = require('ical');
 const router = express.Router();
 const authenticateToken = require('../middlewares/authenticateToken');
+
+// Libraries for Parsing .ics data
+const fs = require('fs');
+const ical = require('ical');
 
 // Multer Middleware
 const multer = require('multer');
