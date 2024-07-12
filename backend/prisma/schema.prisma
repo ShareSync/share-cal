@@ -19,6 +19,9 @@ model User {
   passwordHash String
   firstName String
   lastName  String
+  accessToken String?
+  refreshToken String?
+  tokenExpiry DateTime?
   calendarEvents CalendarEvent[]
   sharedEvents SharedEvent[]
 }
