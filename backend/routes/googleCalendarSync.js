@@ -15,6 +15,7 @@ router.get('/google-calendar', authenticateToken, (req, res) => {
     res.redirect(url);
 });
 
+// OAuth2 Callback Route
 router.get('/google-calendar/callback', authenticateToken, async (req, res) => {
     const { code } = req.query;
     try {
@@ -38,6 +39,7 @@ router.get('/google-calendar/callback', authenticateToken, async (req, res) => {
     }
 });
 
+// Route for Syncing of Google Calendar Events
 router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
