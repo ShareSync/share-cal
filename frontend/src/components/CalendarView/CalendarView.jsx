@@ -4,6 +4,7 @@ import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import { UserContext } from '../../UserContext.js';
 import { useState, useContext, useEffect } from "react";
 import ICSUpload from "../ICSUpload/ICSUpload.jsx";
+import GoogleCalendarSync from "../GoogleCalendarSync/GoogleCalendarSync.jsx";
 
 function CalendarView () {
     const userInfo = useContext(UserContext).user;
@@ -47,6 +48,12 @@ function CalendarView () {
         try {
           const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
           const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
+
+          if (response.status === 401) {
+            updateUser(null);
+            return;
+          }
+
           const data = await response.json();
           updateUser(data.user);
           setEvents(data.user.calendarEvents);
@@ -86,6 +93,7 @@ function CalendarView () {
                 <Header />
                 <button onClick={() => setIsModalOpen(true)}>New Event</button>
                 <ICSUpload onEventsImported={handleParsedEvents}/>
+                <GoogleCalendarSync />
                 <p>This is the Calendar View Page</p>
                 <p>Welcome {userInfo.firstName}</p>
                 <p>Here are the events on your calendar:</p>

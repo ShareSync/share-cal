@@ -14,15 +14,31 @@ function App() {
   const [user, setUser] = useState(() => {
     // Retrieve the user data from storage or set it to null if not found
     const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
   });
 
   const updateUser = (newUser) => {
     setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
   };
 
-  useEffect(() => {
 
-  }, [user]);
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
+        const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
+        const data = await response.json();
+        if (data.user) {
+          updateUser(data.user);
+        }
+      } catch (error) {
+        console.error('Error fetching current user:', error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, updateUser}}>

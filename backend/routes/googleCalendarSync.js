@@ -76,7 +76,8 @@ router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
         }));
         await prisma.calendarEvent.createMany({ data: parsedEvents});
 
-        res.json({ message: 'Google Calendar events synced successfully'});
+        res.redirect('http://localhost:5173/')
+
     } catch (error) {
         console.error('Error syncing Google Calendar events', error);
         res.status(500).json({ error: 'Failed to sync Google Calendar events' });
