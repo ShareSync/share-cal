@@ -3,8 +3,11 @@ import Header from "../Header/Header"
 import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import { UserContext } from '../../UserContext.js';
 import { useState, useContext, useEffect } from "react";
+
+// Importing External Components
 import ICSUpload from "../ICSUpload/ICSUpload.jsx";
 import GoogleCalendarSync from "../GoogleCalendarSync/GoogleCalendarSync.jsx";
+import EventDetail from "../EventDetail/EventDetail.jsx";
 
 // Importing helper functions
 import { getDateString, getTimeString } from "../../utils/utils.js";
@@ -19,6 +22,7 @@ function CalendarView () {
     const userInfo = useContext(UserContext).user;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [events, setEvents] = useState([]);
     const [initialView, setInitialView] = useState({
       date: "",
@@ -100,9 +104,6 @@ function CalendarView () {
       setIsModalOpen(true);
     }
 
-    const handleEventSelect = (info) => {
-      // Triggered by eventClick for FullCalendar library
-    }
     return (
             <>
                 <Header />
@@ -135,8 +136,12 @@ function CalendarView () {
                     editable={true}
                     selectable={true}
                     select={handleDateSelect}
+                    eventClick={() => setIsDetailModalOpen(true)}
                   />
                 </div>
+                {isDetailModalOpen && <EventDetail
+                onClose={() => setIsDetailModalOpen(false)}
+                 />}
             </>
     )
 }
