@@ -13,7 +13,7 @@ const ical = require('ical');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
-// Adding New Calemdar Events
+// Adding New Calendar Events
 router.post('/user/:id/events', authenticateToken, async (req, res) => {
     const {id} = req.params;
     const {title, startAt, endAt, description, location, allDay} = req.body;
@@ -39,6 +39,29 @@ router.post('/user/:id/events', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+//Endpoint for updating calendar event
+router.put('/events/:id', authenticateToken, async (req, res) => {
+    const {id} = req.params;
+    const {title, startAt, endAt, description, location, allDay} = req.body;
+    try {
+        const updatedEvent = await prisma.calendarEvent.update({
+            where: { id: parseInt(id) },
+            data: {
+                title,
+                startAt,
+                endAt,
+                description,
+                location,
+                allDay
+            }
+        });
+        res.status(200).json(updatedEvent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+})
 
 // Endpoint handling ICS file upload and parsing
 router.post('/import-ics', authenticateToken, upload.single('ics'), async (req, res) => {

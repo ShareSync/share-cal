@@ -99,6 +99,10 @@ function CalendarView () {
       })
       setIsModalOpen(true);
     }
+
+    const handleEventSelect = (info) => {
+      // Triggered by eventClick for FullCalendar library
+    }
     return (
             <>
                 <Header />
