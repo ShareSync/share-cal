@@ -6,6 +6,12 @@ import { useState, useContext, useEffect } from "react";
 import ICSUpload from "../ICSUpload/ICSUpload.jsx";
 import GoogleCalendarSync from "../GoogleCalendarSync/GoogleCalendarSync.jsx";
 
+//Importing FullCalendar Library
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+
 function CalendarView () {
     const userInfo = useContext(UserContext).user;
 
@@ -96,13 +102,29 @@ function CalendarView () {
                 <GoogleCalendarSync />
                 <p>This is the Calendar View Page</p>
                 <p>Welcome {userInfo.firstName}</p>
-                <p>Here are the events on your calendar:</p>
-                {eventList}
                 {isModalOpen && <CreateEvent
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onSubmit={handleEventSubmit}
                 />}
+                <div id="calendar-view">
+                  <FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    events={events.map(event => ({
+                      title: event.title,
+                      start: event.startAt,
+                      end: event.endAt
+                    }))}
+                    headerToolbar={{
+                      left:'prev,next today',
+                      center: 'title',
+                      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    }}
+                    editable={true}
+                    selectable={true}
+                  />
+                </div>
             </>
     )
 }
