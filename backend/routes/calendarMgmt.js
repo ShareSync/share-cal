@@ -63,6 +63,19 @@ router.put('/events/:id', authenticateToken, async (req, res) => {
     }
 })
 
+router.delete('/events/:id', authenticateToken, async (req, res) => {
+    const {id} = req.params;
+    try {
+        const deletedEvent = await prisma.calendarEvent.delete({
+            where: {id: parseInt(id)}
+        });
+        res.status(200).json(deletedEvent);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Endpoint handling ICS file upload and parsing
 router.post('/import-ics', authenticateToken, upload.single('ics'), async (req, res) => {
     try {
