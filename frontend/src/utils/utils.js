@@ -8,4 +8,14 @@ async function logout() {
     });
 }
 
-export {logout};
+
+function getDateString(date) {
+    return date.toISOString().slice(0, 10);
+}
+
+function getTimeString(date) {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
+export {logout, getDateString, getTimeString};
