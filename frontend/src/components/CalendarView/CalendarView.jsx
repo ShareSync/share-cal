@@ -4,12 +4,28 @@ import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import { UserContext } from '../../UserContext.js';
 import { useState, useContext, useEffect } from "react";
 import ICSUpload from "../ICSUpload/ICSUpload.jsx";
+import GoogleCalendarSync from "../GoogleCalendarSync/GoogleCalendarSync.jsx";
+
+// Importing helper functions
+import { getDateString, getTimeString } from "../../utils/utils.js";
+
+//Importing FullCalendar Library
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
 function CalendarView () {
     const userInfo = useContext(UserContext).user;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [events, setEvents] = useState([]);
+    const [initialView, setInitialView] = useState({
+      date: "",
+      start: "",
+      end: "",
+      allDay: false
+    })
     const { updateUser } = useContext(UserContext);
 
     const createCalendarEvent = async (calendarEvent) => {
@@ -47,6 +63,12 @@ function CalendarView () {
         try {
           const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
           const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
+
+          if (response.status === 401) {
+            updateUser(null);
+            return;
+          }
+
           const data = await response.json();
           updateUser(data.user);
           setEvents(data.user.calendarEvents);
@@ -62,39 +84,55 @@ function CalendarView () {
         fetchCurrentUser();
       }, []);
 
-    const eventList = events.map((calEvent) => {
-      return (
-        <>
-          <hr />
-          <p>Title: {calEvent.title}</p>
-          <p>Description: {calEvent.description}</p>
-          <p>Start Time: {calEvent.startAt}</p>
-          <p>End Time: {calEvent.endAt}</p>
-          <p>Location: {calEvent.location}</p>
-        </>
-      )
-    });
-
     const handleParsedEvents = (parsedEvents) => {
       parsedEvents.forEach(event => {
         createCalendarEvent(event);
       })
     }
 
+    const handleDateSelect = (info) => {
+      setInitialView({
+        date: getDateString(info.start),
+        start: getTimeString(info.start),
+        end: getTimeString(info.end),
+        allDay: info.allDay
+      })
+      setIsModalOpen(true);
+    }
     return (
             <>
                 <Header />
-                <button onClick={() => setIsModalOpen(true)}>New Event</button>
-                <ICSUpload onEventsImported={handleParsedEvents}/>
-                <p>This is the Calendar View Page</p>
+                <div id="event-src">
+                  <button onClick={() => setIsModalOpen(true)}>New Event</button>
+                  <ICSUpload onEventsImported={handleParsedEvents}/>
+                  <GoogleCalendarSync />
+                </div>
                 <p>Welcome {userInfo.firstName}</p>
-                <p>Here are the events on your calendar:</p>
-                {eventList}
                 {isModalOpen && <CreateEvent
-                    isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onSubmit={handleEventSubmit}
+                    initialView={initialView}
                 />}
+                <div id="calendar-view">
+                  <FullCalendar
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridWeek"
+                    events={events.map(event => ({
+                      title: event.title,
+                      start: event.startAt,
+                      end: event.endAt,
+                      allDay: event.allDay
+                    }))}
+                    headerToolbar={{
+                      left:'prev,next today',
+                      center: 'title',
+                      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    }}
+                    editable={true}
+                    selectable={true}
+                    select={handleDateSelect}
+                  />
+                </div>
             </>
     )
 }

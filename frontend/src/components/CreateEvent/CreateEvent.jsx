@@ -1,7 +1,7 @@
 import "./CreateEvent.css"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function CreateEvent ({onClose, onSubmit}) {
+function CreateEvent ({onClose, onSubmit, initialView}) {
     const [title, setTitle]  = useState('');;
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
@@ -35,6 +35,13 @@ function CreateEvent ({onClose, onSubmit}) {
             setEndTime("23:59");
         }
     }
+
+    useEffect(() => {
+        setDate(initialView.date);
+        setStartTime(initialView.start);
+        setEndTime(initialView.end);
+        setAllDay(initialView.allDay)
+    }, []);
     return (
         <div className="modal-overlay">
             <div className="modal-content">
@@ -67,7 +74,7 @@ function CreateEvent ({onClose, onSubmit}) {
                     </div>}
 
                     <p> Event Location</p>
-                    <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Event Location" required/>
+                    <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Event Location"/>
 
 
                     <p>Event Participants</p>
