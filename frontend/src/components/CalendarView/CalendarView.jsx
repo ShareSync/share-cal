@@ -29,7 +29,13 @@ function CalendarView () {
       start: "",
       end: "",
       allDay: false
-    })
+    });
+    const [detailView, setDetailView] = useState({
+      title: "",
+      start: "",
+      end: "",
+      allDay: false
+    });
     const { updateUser } = useContext(UserContext);
 
     const createCalendarEvent = async (calendarEvent) => {
@@ -104,6 +110,17 @@ function CalendarView () {
       setIsModalOpen(true);
     }
 
+    const handleEventSelect = (info) => {
+      setDetailView({
+        title: info.event.title,
+        start: info.event.start,
+        end: info.event.end,
+        allDay: info.event.allDay,
+        location: info.event.extendedProps.location,
+        description: info.event.extendedProps.description
+      })
+      setIsDetailModalOpen(true);
+    }
     return (
             <>
                 <Header />
@@ -120,13 +137,18 @@ function CalendarView () {
                 />}
                 <div id="calendar-view">
                   <FullCalendar
+                    height={"80vh"}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     events={events.map(event => ({
                       title: event.title,
                       start: event.startAt,
                       end: event.endAt,
-                      allDay: event.allDay
+                      allDay: event.allDay,
+                      extendedProps: {
+                        description: event.description,
+                        location: event.location
+                      }
                     }))}
                     headerToolbar={{
                       left:'prev,next today',
@@ -136,11 +158,12 @@ function CalendarView () {
                     editable={true}
                     selectable={true}
                     select={handleDateSelect}
-                    eventClick={() => setIsDetailModalOpen(true)}
+                    eventClick={handleEventSelect}
                   />
                 </div>
                 {isDetailModalOpen && <EventDetail
-                onClose={() => setIsDetailModalOpen(false)}
+                  onClose={() => setIsDetailModalOpen(false)}
+                  content={detailView}
                  />}
             </>
     )
