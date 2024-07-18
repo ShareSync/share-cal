@@ -15,7 +15,6 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
         e.preventDefault();
         const startAt = new Date(`${date} ${startTime}`);
         const endAt = new Date(`${date} ${endTime}`)
-
         const eventData ={
             title: title,
             description: description,

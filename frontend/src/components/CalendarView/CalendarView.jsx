@@ -219,7 +219,7 @@ function CalendarView () {
         date: "",
         start: "",
         end: "",
-        allDay: "",
+        allDay: false,
         description: "",
         location: ""
       })
