@@ -9,6 +9,7 @@ import SignUpPage from './components/SignUpPage/SignUpPage';
 import CalenderView from './components/CalendarView/CalendarView';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import SharedEventsPage from './components/SharedEventsPage/SharedEventsPage';
+import GoogleOAuthCallback from './components/GoogleOAuthCallback/GoogleOAuthCallback';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -48,6 +49,7 @@ function App() {
           <Route path='/signup' element= {<SignUpPage />}/>
           <Route path='/user/:id/calendar' element={<CalenderView />}/>
           <Route path='/user/:id/shared-events' element={<SharedEventsPage />}/>
+          <Route path='/google-calendar/callback' element={<GoogleOAuthCallback />} />
           <Route path='*' element={<NotFoundPage />}/>
         </Routes>
       </Router>

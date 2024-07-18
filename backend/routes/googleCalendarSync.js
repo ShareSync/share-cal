@@ -15,24 +15,21 @@ router.get('/google-calendar', authenticateToken, (req, res) => {
     res.redirect(url);
 });
 
-// OAuth2 Callback Route
-router.get('/google-calendar/callback', authenticateToken, async (req, res) => {
-    const { code } = req.query;
+router.post('/google-calendar/callback', authenticateToken, async (req, res) => {
+    const { code } = req.body; // Get code from the body instead of query
     try {
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
-
         // Store tokens in the User Table
         await prisma.user.update({
             where: { id: req.user.id },
             data: {
-                accessToken:  tokens.access_token,
+                accessToken: tokens.access_token,
                 refreshToken: tokens.refresh_token,
                 tokenExpiry: new Date(tokens.expiry_date),
             },
         });
-
-        res.redirect('http://localhost:3000/google-cal/sync-google-calendar');
+        res.json({ message: 'Authentication successful', tokens });
     } catch (error) {
         console.error('Error retrieving access token', error);
         res.status(500).send('Error retrieving access token');
@@ -75,8 +72,7 @@ router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
             userId: req.user.id,
         }));
         await prisma.calendarEvent.createMany({ data: parsedEvents});
-
-        res.redirect('http://localhost:5173/')
+        res.json({ message: 'Done Syncing Calendar Events'});
 
     } catch (error) {
         console.error('Error syncing Google Calendar events', error);

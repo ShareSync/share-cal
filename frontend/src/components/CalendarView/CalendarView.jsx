@@ -112,6 +112,7 @@ function CalendarView () {
 
     const handleEventSelect = (info) => {
       setDetailView({
+        id: info.event.id,
         title: info.event.title,
         start: info.event.start,
         end: info.event.end,
@@ -137,10 +138,11 @@ function CalendarView () {
                 />}
                 <div id="calendar-view">
                   <FullCalendar
-                    height={"80vh"}
+                    height={"70vh"}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     events={events.map(event => ({
+                      id: event.id,
                       title: event.title,
                       start: event.startAt,
                       end: event.endAt,
@@ -164,6 +166,7 @@ function CalendarView () {
                 {isDetailModalOpen && <EventDetail
                   onClose={() => setIsDetailModalOpen(false)}
                   content={detailView}
+                  refetchEvents={fetchCurrentUser}
                  />}
             </>
     )
