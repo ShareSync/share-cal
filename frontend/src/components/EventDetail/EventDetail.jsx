@@ -1,6 +1,6 @@
 import "./EventDetail.css"
 import { getReadableDateStr, getReadableTimeStr } from "../../utils/utils";
-function EventDetail ({onClose, content, refetchEvents, editView}) {
+function EventDetail ({onClose, content, refetchEvents, handleEdit}) {
 
     const handleEventDelete = async () => {
         try{
@@ -24,14 +24,10 @@ function EventDetail ({onClose, content, refetchEvents, editView}) {
           }
     }
 
-    const handleEventEdit = () => {
-      // TODO: this is going to implement in a future commit
-    }
-
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                    <button onClick={() => handleEventEdit()}>Edit</button>
+                    <button onClick={handleEdit}>Edit</button>
                     <button onClick={() => handleEventDelete()}>Delete</button>
                     <h1>{content.title}</h1>
 

@@ -23,8 +23,10 @@ function CalendarView () {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
     const [events, setEvents] = useState([]);
     const [initialView, setInitialView] = useState({
+      id: "",
       title: "",
       date: "",
       start: "",
@@ -104,6 +106,7 @@ function CalendarView () {
     }
 
     const handleDateSelect = (info) => {
+      setIsEdit(false);
       setInitialView({
         date: getDateString(info.start),
         start: getTimeString(info.start),
@@ -157,21 +160,87 @@ function CalendarView () {
         }
         throw error;
       }
+    }
 
+    const handleEventEditButton = async (info, id) => {
+      try {
+        const updatedEvent = {
+          title: info.title,
+          startAt: info.startAt.toISOString(),
+          endAt: info.endAt.toISOString(),
+          description: info.description,
+          location: info.location,
+          allDay: info.allDay
+        }
+        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
+        const options = {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'},
+        body: JSON.stringify(updatedEvent),
+        credentials: 'include'
+          };
+        const response = await fetch(`${backendUrlAccess}/calendar/events/${id}`, options);
+        if (!response.ok) {
+          throw new Error('Something went wrong!');
+        }
+        fetchCurrentUser();
+        setIsModalOpen(false);
+      } catch (error) {
+        console.error('Failed to update calendar event: ', error);
+        if (error.response && error.response.status === 401 ) {
+          updateUser(null);
+        }
+        throw error;
+      }
+    }
+
+    const handleEdit = (info) => {
+      setIsDetailModalOpen(false);
+      setIsEdit(true);
+      const editInfo = {
+        id: info.id,
+        title: info.title,
+        date: getDateString(info.start),
+        start: getTimeString(info.start),
+        end: getTimeString(info.end),
+        allDay: info.allDay,
+        description: info.description,
+        location: info.location
+      }
+      setInitialView(editInfo);
+      setIsModalOpen(true);
+    }
+
+    const newEventButton = () => {
+      setInitialView({
+        title: "",
+        date: "",
+        start: "",
+        end: "",
+        allDay: "",
+        description: "",
+        location: ""
+      })
+      setIsModalOpen(true);
+      setIsEdit(false);
     }
     return (
             <>
                 <Header />
                 <div id="event-src">
-                  <button onClick={() => setIsModalOpen(true)}>New Event</button>
+                  <button onClick={newEventButton}>New Event</button>
                   <ICSUpload onEventsImported={handleParsedEvents}/>
                   <GoogleCalendarSync />
                 </div>
                 <p>Welcome {userInfo.firstName}</p>
                 {isModalOpen && <CreateEvent
                     onClose={() => setIsModalOpen(false)}
-                    onSubmit={handleEventSubmit}
+                    onCreate={handleEventSubmit}
+                    onEdit={handleEventEditButton}
                     initialView={initialView}
+                    isEdit={isEdit}
                 />}
                 <div id="calendar-view">
                   <FullCalendar
@@ -204,7 +273,7 @@ function CalendarView () {
                 {isDetailModalOpen && <EventDetail
                   onClose={() => setIsDetailModalOpen(false)}
                   content={detailView}
-                  editView={initialView}
+                  handleEdit={() => handleEdit(detailView)}
                   refetchEvents={fetchCurrentUser}
                  />}
             </>
