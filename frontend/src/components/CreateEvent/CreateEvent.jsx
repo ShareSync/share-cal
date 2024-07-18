@@ -37,6 +37,7 @@ function CreateEvent ({onClose, onSubmit, initialView}) {
     }
 
     useEffect(() => {
+        setTitle(initialView.title);
         setDate(initialView.date);
         setStartTime(initialView.start);
         setEndTime(initialView.end);

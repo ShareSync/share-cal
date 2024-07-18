@@ -25,9 +25,12 @@ function CalendarView () {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [events, setEvents] = useState([]);
     const [initialView, setInitialView] = useState({
+      title: "",
       date: "",
       start: "",
       end: "",
+      description: "",
+      location: "",
       allDay: false
     });
     const [detailView, setDetailView] = useState({
@@ -122,6 +125,40 @@ function CalendarView () {
       })
       setIsDetailModalOpen(true);
     }
+
+    const handleEventEdit = async (info) => {
+      try {
+        const updatedEvent = {
+          title: info.event.title,
+          startAt: info.event.startStr,
+          endAt: info.event.endStr,
+          description: info.event.extendedProps.description,
+          location: info.event.extendedProps.location,
+          allDay: info.event.allDay
+        }
+        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
+        const options = {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'},
+        body: JSON.stringify(updatedEvent),
+        credentials: 'include'
+          };
+        const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
+        if (!response.ok) {
+          throw new Error('Something went wrong!');
+        }
+        fetchCurrentUser();
+      } catch (error) {
+        console.error('Failed to update calendar event: ', error);
+        if (error.response && error.response.status === 401 ) {
+          updateUser(null);
+        }
+        throw error;
+      }
+
+    }
     return (
             <>
                 <Header />
@@ -161,11 +198,13 @@ function CalendarView () {
                     selectable={true}
                     select={handleDateSelect}
                     eventClick={handleEventSelect}
+                    eventChange={handleEventEdit}
                   />
                 </div>
                 {isDetailModalOpen && <EventDetail
                   onClose={() => setIsDetailModalOpen(false)}
                   content={detailView}
+                  editView={initialView}
                   refetchEvents={fetchCurrentUser}
                  />}
             </>
