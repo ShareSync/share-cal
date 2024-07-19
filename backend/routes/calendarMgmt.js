@@ -13,7 +13,7 @@ const ical = require('ical');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
-// Adding New Calendar Events
+// API Endpoint for Adding New Calendar Events
 router.post('/user/:id/events', authenticateToken, async (req, res) => {
     const {id} = req.params;
     const {title, startAt, endAt, description, location, allDay} = req.body;
@@ -40,7 +40,7 @@ router.post('/user/:id/events', authenticateToken, async (req, res) => {
     }
 });
 
-//Endpoint for updating calendar event
+// API Endpoint for Updating a Calendar Event
 router.put('/events/:id', authenticateToken, async (req, res) => {
     const {id} = req.params;
     const {title, startAt, endAt, description, location, allDay} = req.body;
@@ -63,6 +63,7 @@ router.put('/events/:id', authenticateToken, async (req, res) => {
     }
 })
 
+// API Endpoint for Deleting a Calendar Event
 router.delete('/events/:id', authenticateToken, async (req, res) => {
     const {id} = req.params;
     try {
@@ -76,7 +77,7 @@ router.delete('/events/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// Endpoint handling ICS file upload and parsing
+// API Endpoint for Handling ICS File Upload and Parsing
 router.post('/import-ics', authenticateToken, upload.single('ics'), async (req, res) => {
     try {
         const filePath = req.file.path

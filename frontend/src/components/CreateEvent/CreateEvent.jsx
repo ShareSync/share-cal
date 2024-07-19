@@ -49,6 +49,7 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
         setLocation(initialView.location);
         setDescription(initialView.description);
     }, []);
+
     return (
         <div className="modal-overlay">
             <div className="modal-content">

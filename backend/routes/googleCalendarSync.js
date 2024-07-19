@@ -3,10 +3,12 @@ const prisma = new PrismaClient();
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middlewares/authenticateToken');
-const { oauth2Client, SCOPES } = require('../middlewares/googleOAuthCOnfig');
+
+// Importing modules for Google Calendar API
+const { oauth2Client, SCOPES } = require('../middlewares/googleOAuthConfig');
 const {google} = require('googleapis');
 
-// Starts the OAuth flow
+// API Endpoint to Start the OAuth flow
 router.get('/google-calendar', authenticateToken, (req, res) => {
     const url = oauth2Client.generateAuthUrl({
         access_type: 'offline',
@@ -15,6 +17,7 @@ router.get('/google-calendar', authenticateToken, (req, res) => {
     res.redirect(url);
 });
 
+// API Endpoint for Callback to Exchange Authorization code for Access Token
 router.post('/google-calendar/callback', authenticateToken, async (req, res) => {
     const { code } = req.body; // Get code from the body instead of query
     try {
@@ -36,7 +39,7 @@ router.post('/google-calendar/callback', authenticateToken, async (req, res) => 
     }
 });
 
-// Route for Syncing of Google Calendar Events
+// API Endpoint for Fetching & Syncing Google Calendar Events
 router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
@@ -54,6 +57,7 @@ router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     try {
+        // Fetches list of Calendar Events from Google Calendar API
         const events = await calendar.events.list({
             calendarId: 'primary',
             timeMin: new Date().toISOString(),
@@ -62,6 +66,7 @@ router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
             orderBy: 'startTime',
         });
 
+        // Stores fetched Google Calendar Events into Database
         const parsedEvents = events.data.items.map(event => ({
             title: event.summary || 'Untitled Event',
             description: event.description || '',
