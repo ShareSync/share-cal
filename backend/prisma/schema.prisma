@@ -23,7 +23,8 @@ model User {
   refreshToken String?
   tokenExpiry DateTime?
   calendarEvents CalendarEvent[]
-  sharedEvents SharedEvent[]
+  preferredStartTime Int @default(17)
+  preferredEndTime Int @default(36)
 }
 
 model CalendarEvent {
@@ -35,16 +36,8 @@ model CalendarEvent {
   description String?
   location String?
   allDay  Boolean @default(false)
+  source String @default("personal") // Either personal, google, ics
+  status  String  @default("pending") // accepted, declined, pending
   user  User  @relation(fields: [userId], references: [id])
-  masterEventId String? @unique
-  sharedEvents  SharedEvent[]
-}
-
-model SharedEvent {
-  id  Int @id @default(autoincrement()) @unique
-  eventId Int
-  participantId Int
-  status  String
-  participant User  @relation(fields: [participantId], references: [id])
-  event CalendarEvent @relation(fields: [eventId], references: [id])
+  masterEventId String?
 }
