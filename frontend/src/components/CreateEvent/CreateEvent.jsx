@@ -1,7 +1,7 @@
 import "./CreateEvent.css"
 import { useState, useEffect } from "react";
 
-function CreateEvent ({onClose, onSubmit, initialView}) {
+function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
     const [title, setTitle]  = useState('');;
     const [description, setDescription] = useState('');
     const [date, setDate] = useState('');
@@ -15,7 +15,6 @@ function CreateEvent ({onClose, onSubmit, initialView}) {
         e.preventDefault();
         const startAt = new Date(`${date} ${startTime}`);
         const endAt = new Date(`${date} ${endTime}`)
-
         const eventData ={
             title: title,
             description: description,
@@ -25,7 +24,12 @@ function CreateEvent ({onClose, onSubmit, initialView}) {
             allDay: allDay,
             participants: participants
         };
-        onSubmit(eventData);
+        if (isEdit){
+            onEdit(eventData, initialView.id);
+        }
+        else{
+            onCreate(eventData);
+        }
     }
 
     const handleAllDayClicked = (e) => {
@@ -37,10 +41,13 @@ function CreateEvent ({onClose, onSubmit, initialView}) {
     }
 
     useEffect(() => {
+        setTitle(initialView.title);
         setDate(initialView.date);
         setStartTime(initialView.start);
         setEndTime(initialView.end);
         setAllDay(initialView.allDay)
+        setLocation(initialView.location);
+        setDescription(initialView.description);
     }, []);
     return (
         <div className="modal-overlay">
@@ -82,7 +89,7 @@ function CreateEvent ({onClose, onSubmit, initialView}) {
 
                     <div id="form-button">
                         <button onClick={onClose} type="button">Cancel</button>
-                        <button type="submit">Create Event</button>
+                        <button type="submit">{isEdit ? "Save Changes" : "Create Event"}</button>
                     </div>
                 </form>
                 </div>

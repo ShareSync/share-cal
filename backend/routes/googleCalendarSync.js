@@ -70,6 +70,7 @@ router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
             location: event.location || '',
             allDay: Boolean(!event.start.dateTime && !event.end.dateTime && event.start.date && event.end.date),
             userId: req.user.id,
+            // TODO: to implement masterEventId from change in Prisma Schema in a future commit
         }));
         await prisma.calendarEvent.createMany({ data: parsedEvents});
         res.json({ message: 'Done Syncing Calendar Events'});

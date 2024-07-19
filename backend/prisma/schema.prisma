@@ -36,6 +36,7 @@ model CalendarEvent {
   location String?
   allDay  Boolean @default(false)
   user  User  @relation(fields: [userId], references: [id])
+  masterEventId String? @unique
   sharedEvents  SharedEvent[]
 }
 
