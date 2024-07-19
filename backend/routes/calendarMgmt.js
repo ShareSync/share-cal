@@ -80,6 +80,33 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
     }
 });
 
+// API Endpoint for Responding to Shared Event Invitation
+router.patch('/events/:id/respond', authenticateToken, async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    const {status} = req.body;
+    const userId = req.user.id;
+
+    try {
+        const event = await prisma.calendarEvent.findUnique({
+            where: {id: eventId},
+        });
+
+        if (!event || event.userId !== userId) {
+            return res.status(404).json({ error: 'Event not found or not authorized' });
+        }
+
+        await prisma.calendarEvent.update({
+            where: {id: eventId},
+            data: {status},
+        });
+
+        res.status(200).json({ message: "Event response recorded" });
+    } catch (error) {
+        console.error("Error responding to event:", error);
+        res.status(500).json({ error: "Failed to respond to event" });
+    }
+});
+
 // API Endpoint for Updating a Calendar Event
 router.put('/events/:id', authenticateToken, async (req, res) => {
     const {id} = req.params;
