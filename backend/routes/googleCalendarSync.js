@@ -40,7 +40,7 @@ router.post('/google-calendar/callback', authenticateToken, async (req, res) => 
 });
 
 // API Endpoint for Fetching & Syncing Google Calendar Events
-router.get('/sync-google-calendar', authenticateToken, async (req, res) => {
+router.get('/sync', authenticateToken, async (req, res) => {
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
     });

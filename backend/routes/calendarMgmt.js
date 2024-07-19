@@ -14,8 +14,8 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 // API Endpoint for Adding New Calendar Events
-router.post('/user/:id/events', authenticateToken, async (req, res) => {
-    const {id} = req.params;
+router.post('/:user_id/events', authenticateToken, async (req, res) => {
+    const {user_id} = req.params;
     const {title, startAt, endAt, description, location, allDay} = req.body;
     try {
     const newEvent = await prisma.calendarEvent.create({
@@ -28,7 +28,7 @@ router.post('/user/:id/events', authenticateToken, async (req, res) => {
             allDay,
             user: {
                 connect: {
-                    id: parseInt(id)
+                    id: parseInt(user_id)
                 }
             }
         }

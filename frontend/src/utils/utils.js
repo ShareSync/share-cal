@@ -93,7 +93,7 @@ const createCalendarEvent = async (calendarEvent, userId, fetchCurrentUser, upda
         body: JSON.stringify(calendarEvent),
         credentials: 'include'
         }
-      const response = await fetch(`${backendUrlAccess}/calendar/user/${userId}/events`, options);
+      const response = await fetch(`${backendUrlAccess}/calendar/${userId}/events`, options);
       if (!response.ok) {
         throw new Error('Something went wrong!');
       }
