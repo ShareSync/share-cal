@@ -1,16 +1,16 @@
 import "./CalendarView.css"
-import Header from "../Header/Header"
-import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import { UserContext } from '../../UserContext.js';
 import { useState, useContext, useEffect } from "react";
 
 // Importing External Components
+import Header from "../Header/Header"
 import ICSUpload from "../ICSUpload/ICSUpload.jsx";
 import GoogleCalendarSync from "../GoogleCalendarSync/GoogleCalendarSync.jsx";
+import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import EventDetail from "../EventDetail/EventDetail.jsx";
 
 // Importing helper functions
-import { getDateString, getTimeString } from "../../utils/utils.js";
+import { createCalendarEvent, getDateString, getTimeString } from "../../utils/utils.js";
 
 //Importing FullCalendar Library
 import FullCalendar from '@fullcalendar/react';
@@ -19,12 +19,18 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
 function CalendarView () {
-    const userInfo = useContext(UserContext).user;
 
+    // UseContext Definition
+    const userInfo = useContext(UserContext).user;
+    const { updateUser } = useContext(UserContext);
+
+    // State Variables
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [events, setEvents] = useState([]);
+
+    // Handles View of the Event Creation/Editing Modal
     const [initialView, setInitialView] = useState({
       id: "",
       title: "",
@@ -35,45 +41,27 @@ function CalendarView () {
       location: "",
       allDay: false
     });
+
+    // Handles View of the Event Detail Modal
     const [detailView, setDetailView] = useState({
       title: "",
       start: "",
       end: "",
       allDay: false
     });
-    const { updateUser } = useContext(UserContext);
 
-    const createCalendarEvent = async (calendarEvent) => {
-      try {
-        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-        const options = {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'},
-          body: JSON.stringify(calendarEvent),
-          credentials: 'include'
-          }
-        const response = await fetch(`${backendUrlAccess}/calendar/user/${userInfo.id}/events`, options);
-        if (!response.ok) {
-          throw new Error('Something went wrong!');
-        }
-        fetchCurrentUser();
-      } catch (error) {
-        console.error('Failed to create new calendar event: ', error);
-        if (error.response && error.response.status === 401 ) {
-          updateUser(null);
-        }
-        throw error;
-      }
-    };
-
-
+    // Handles Event Creation
     const handleEventSubmit = (eventData) => {
-        createCalendarEvent(eventData);
+        createCalendarEvent(eventData, userInfo.id, fetchCurrentUser, updateUser);
         setIsModalOpen(false);
     }
 
+    // Handles Parsed Events from uploaded .ics file
+    const handleParsedEvents = (parsedEvents) => {
+      parsedEvents.forEach(event => {
+        createCalendarEvent(event, userInfo.id, fetchCurrentUser, updateUser);
+      })
+    }
     const fetchCurrentUser = async () => {
         try {
           const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
@@ -99,11 +87,6 @@ function CalendarView () {
         fetchCurrentUser();
       }, []);
 
-    const handleParsedEvents = (parsedEvents) => {
-      parsedEvents.forEach(event => {
-        createCalendarEvent(event);
-      })
-    }
 
     const handleDateSelect = (info) => {
       setIsEdit(false);
@@ -204,7 +187,7 @@ function CalendarView () {
         title: info.title,
         date: getDateString(info.start),
         start: getTimeString(info.start),
-        end: getTimeString(info.end),
+        end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
         allDay: info.allDay,
         description: info.description,
         location: info.location

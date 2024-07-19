@@ -2,6 +2,7 @@ import "./LoginForm.css"
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../../UserContext.js';
 import { useState, useContext } from "react";
+import { handleLogin } from "../../utils/utils.js";
 
 
 function LoginForm (){
@@ -17,30 +18,7 @@ function LoginForm (){
             email: email,
             password: password
           };
-
-          try {
-            const response = await fetch('http://localhost:3000/auth/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(userObj),
-              credentials: 'include'
-            });
-
-            if (!response.ok) {
-              throw new Error('Login failed');
-            }
-
-            const data = await response.json();
-            const { user } = data;
-
-            updateUser(user);
-            navigate('/');
-          } catch (error) {
-            console.error('Error logging in:', error.message);
-            alert("Unsuccessful login attempt. Try again.");
-          }
+          handleLogin(userObj, updateUser, navigate);
         } else {
           alert("Please fill out all fields");
         }

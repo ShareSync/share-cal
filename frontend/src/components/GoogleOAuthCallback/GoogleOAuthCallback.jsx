@@ -28,7 +28,7 @@ function GoogleOAuthCallback () {
     }, [navigate]);
 
     const syncGoogleCalendar = () => {
-        fetch('http://localhost:3000/google-cal/sync-google-calendar', {
+        fetch('http://localhost:3000/google-cal/sync', {
             method: 'GET',
             credentials: 'include', // Ensure cookies are sent
         })

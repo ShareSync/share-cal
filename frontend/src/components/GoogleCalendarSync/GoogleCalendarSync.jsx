@@ -2,7 +2,7 @@ import React from 'react';
 
 const GoogleCalendarSync = () => {
     const handleSync = () => {
-        window.location.href = 'http://localhost:3000/google-cal/google-calendar';
+        window.location.href = `http://localhost:3000/google-cal/google-calendar`;
     };
 
     return (

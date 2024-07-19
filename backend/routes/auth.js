@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
   }
 })
 
-//Get current user
+// Fetches information about the currently logged in user
 router.get('/current', authenticateToken, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where:

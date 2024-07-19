@@ -1,11 +1,8 @@
 import React, {useState} from 'react';
+import { handleICSParsing } from '../../utils/utils';
 
 const ICSUpload = ({onEventsImported}) => {
     const [file, setFile] = useState(null);
-
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,33 +13,15 @@ const ICSUpload = ({onEventsImported}) => {
 
         const formData = new FormData();
         formData.append('ics', file);
+        handleICSParsing(formData, onEventsImported);
 
-        const options = {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
-        }
-
-        try{
-            const response = await fetch('http://localhost:3000/calendar/import-ics', options);
-            const data = await response.json();
-            if(response.ok) {
-                alert('Eevnts imported successfully!');
-                onEventsImported(data);
-            } else {
-                alert(`Failed to import events: ${data.error}`);
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            alert('Failed to upload file. Please try again.');
-        }
     };
 
     return (
         <div>
             <h2> Import Events from ICS FIle</h2>
             <form onSubmit={handleSubmit}>
-                <input type="file" accept=".ics" onChange={handleFileChange} />
+                <input type="file" accept=".ics" onChange={(e) => setFile(e.target.files[0])} />
                 <button type="submit">Upload</button>
             </form>
         </div>
