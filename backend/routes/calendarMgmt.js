@@ -16,9 +16,10 @@ const upload = multer({ dest: 'uploads/' });
 // API Endpoint for Adding New Calendar Events
 router.post('/:user_id/events', authenticateToken, async (req, res) => {
     const {user_id} = req.params;
-    const {title, startAt, endAt, description, location, allDay} = req.body;
+    const {title, startAt, endAt, description, location, allDay, invitees} = req.body;
     try {
-    const newEvent = await prisma.calendarEvent.create({
+        // Creates Organizer's Personal Event Or Creates Personal Event
+        const masterEvent = await prisma.calendarEvent.create({
         data: {
             title,
             startAt,
@@ -30,12 +31,51 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
                 connect: {
                     id: parseInt(user_id)
                 }
-            }
-        }
+            },
+            status: 'accepted',
+        },
       });
-      res.json({ event: newEvent });
+
+      // For Creation of Shared Events were invitees are provided
+      if (invitees && invitees.length > 0) {
+        const inviteeUsers = await prisma.user.findMany({
+            where: {
+                email: {
+                    in: invitees,
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        if (inviteeUsers.length !== invitees.length) {
+            return res.status(400).json({ error: 'One or more invitees not found'});
+        }
+
+        // Creates events for invitees
+        const inviteeEvents = inviteeUsers.map(invitee => {
+            return {
+                title,
+                startAt,
+                endAt,
+                description,
+                location,
+                allDay,
+                userId: invitee.id,
+                masterEventId: masterEvent.id.toString(),
+                status: 'pending',
+            };
+        });
+
+        await prisma.calendarEvent.createMany({
+            data: inviteeEvents,
+        });
+      }
+
+      res.json({ event: masterEvent });
     } catch (error) {
-        console.error(error);
+        console.error("Error creating event:", error);
         res.status(500).json({ error: 'Server error' });
     }
 });
