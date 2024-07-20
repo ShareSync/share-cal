@@ -153,6 +153,39 @@ async function handleICSParsing(formData, onEventsImported) {
     }
 }
 
+// API Call for Fetching Event Invitations
+async function fetchInvitations(setInvitations) {
+  try {
+      const response = await fetch(`${backendUrlAccess}/calendar/invitations`, { credentials: 'include' });
+      const data = await response.json();
+      setInvitations(data);
+  } catch (error) {
+    console.error('Error fetching invitations:', error);
+  }
+}
+
+// API Call for Responding to Event Invitations
+async function respondToInvitation(eventId, status, setInvitations, invitations){
+  try {
+    const inviteResponse = {
+      status
+    }
+    const options = {
+      method: 'PATCH',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+      body: JSON.stringify(inviteResponse),
+      credentials: 'include'
+        };
+    const response = await fetch(`${backendUrlAccess}/calendar/events/${eventId}/respond`, options);
+    const data = await response.json();
+    setInvitations(invitations.filter(invite => invite.id !== eventId));
+  } catch (error) {
+    console.error('Error responding to invitation:', error);
+  }
+}
+
 // Helper Functions
 // Converts JS Date object (Provide example) into ISO String format (Provide example) -> Specifically extracts the date
 function getDateString(date) {
@@ -186,5 +219,6 @@ export {
     handleSignUp, handleLogin, handleOnLogout,
     handleICSParsing,
     createCalendarEvent, handleEventDelete,
+    fetchInvitations, respondToInvitation,
     getDateString, getTimeString, getReadableDateStr, getReadableTimeStr
 };

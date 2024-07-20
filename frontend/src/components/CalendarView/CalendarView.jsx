@@ -238,7 +238,8 @@ function CalendarView () {
                       allDay: event.allDay,
                       extendedProps: {
                         description: event.description,
-                        location: event.location
+                        location: event.location,
+                        status: event.status
                       }
                     }))}
                     headerToolbar={{

@@ -80,6 +80,25 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
     }
 });
 
+// API Endpoint for Fetching Event Invitation for Current User
+router.get('/invitations', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const invitations = await prisma.calendarEvent.findMany({
+            where: {
+                userId,
+                status: 'pending',
+            },
+        });
+
+        res.status(200).json(invitations);
+    } catch (error) {
+        console.error('Error fetching invitations:', error);
+        res.status(500).json({error: 'Failed to fetch invitations'});
+    }
+});
+
 // API Endpoint for Responding to Shared Event Invitation
 router.patch('/events/:id/respond', authenticateToken, async (req, res) => {
     const eventId = parseInt(req.params.id);
