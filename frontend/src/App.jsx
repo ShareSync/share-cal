@@ -46,7 +46,7 @@ function App() {
         <Routes>
           <Route path="/" element={user ? <CalenderView />: <LoginPage />} />
           <Route path='/signup' element= {<SignUpPage />}/>
-          <Route path='/user/:id/shared-events' element={<SharedEventsPage />}/>
+          <Route path='/shared-events' element={user ? <SharedEventsPage /> : <LoginPage />}/>
           <Route path='/google-calendar/callback' element={<GoogleOAuthCallback />} />
           <Route path='*' element={<NotFoundPage />}/>
         </Routes>

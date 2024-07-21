@@ -16,9 +16,18 @@ const upload = multer({ dest: 'uploads/' });
 // API Endpoint for Adding New Calendar Events
 router.post('/:user_id/events', authenticateToken, async (req, res) => {
     const {user_id} = req.params;
-    const {title, startAt, endAt, description, location, allDay} = req.body;
+    const {title, startAt, endAt, description, location, allDay, invitees} = req.body;
     try {
-    const newEvent = await prisma.calendarEvent.create({
+        // Retrieve the organizer's email
+        const organizer = await prisma.user.findUnique({
+            where: { id: parseInt(user_id) },
+            select: { email: true }
+        });
+        // Filter out the organizer's email from invitees if present
+        const filteredInvitees = invitees.filter(email => email !== organizer.email);
+
+        // Creates Organizer's Personal Event Or Creates Personal Event
+        const masterEvent = await prisma.calendarEvent.create({
         data: {
             title,
             startAt,
@@ -30,13 +39,100 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
                 connect: {
                     id: parseInt(user_id)
                 }
-            }
-        }
+            },
+            status: 'accepted',
+        },
       });
-      res.json({ event: newEvent });
+
+      // For Creation of Shared Events were invitees are provided
+      if (filteredInvitees.length > 0) {
+        const inviteeUsers = await prisma.user.findMany({
+            where: {
+                email: {
+                    in: filteredInvitees,
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        if (inviteeUsers.length !== filteredInvitees.length) {
+            await prisma.calendarEvent.delete({
+                where: {id: parseInt(masterEvent.id)}
+            });
+            return res.status(400).json({ error: 'One or more invitees not found'});
+        }
+        // Creates events for invitees
+        const inviteeEvents = inviteeUsers.map(invitee => {
+            return {
+                title,
+                startAt,
+                endAt,
+                description,
+                location,
+                allDay,
+                userId: invitee.id,
+                masterEventId: masterEvent.id.toString(),
+                status: 'pending',
+            };
+        });
+
+        await prisma.calendarEvent.createMany({
+            data: inviteeEvents,
+        });
+      }
+
+      res.json({ event: masterEvent });
     } catch (error) {
-        console.error(error);
+        console.error("Error creating event:", error);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// API Endpoint for Fetching Event Invitation for Current User
+router.get('/invitations', authenticateToken, async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const invitations = await prisma.calendarEvent.findMany({
+            where: {
+                userId,
+                status: 'pending',
+            },
+        });
+
+        res.status(200).json(invitations);
+    } catch (error) {
+        console.error('Error fetching invitations:', error);
+        res.status(500).json({error: 'Failed to fetch invitations'});
+    }
+});
+
+// API Endpoint for Responding to Shared Event Invitation
+router.patch('/events/:id/respond', authenticateToken, async (req, res) => {
+    const eventId = parseInt(req.params.id);
+    const {status} = req.body;
+    const userId = req.user.id;
+
+    try {
+        const event = await prisma.calendarEvent.findUnique({
+            where: {id: eventId},
+        });
+
+        if (!event || event.userId !== userId) {
+            return res.status(404).json({ error: 'Event not found or not authorized' });
+        }
+
+        await prisma.calendarEvent.update({
+            where: {id: eventId},
+            data: {status},
+        });
+
+        res.status(200).json({ message: "Event response recorded" });
+    } catch (error) {
+        console.error("Error responding to event:", error);
+        res.status(500).json({ error: "Failed to respond to event" });
     }
 });
 

@@ -1,10 +1,31 @@
 import "./SharedEventsPage.css"
+import { useState, useEffect } from "react";
+import { fetchInvitations, respondToInvitation } from "../../utils/utils";
 
 function SharedEventsPage () {
+    const [invitations, setInvitations] = useState([]);
+
+    useEffect(() => {
+        fetchInvitations(setInvitations);
+    }, []);
+
+    const handleInvitationResponse = (eventId, status) => {
+        respondToInvitation(eventId, status);
+        setInvitations(invitations.filter(invite => invite.id !== eventId));
+    }
     return (
-        <>
-            This is the Shared Events Page
-        </>
+        <div>
+            <h2>Here are the events that have been shared with you</h2>
+            <ul>
+                {invitations.map(invite => (
+                    <li key={invite.id}>
+                        <p>{invite.title}</p>
+                        <button onClick={() => handleInvitationResponse(invite.id, 'accepted')}>Accept</button>
+                        <button onClick={() => handleInvitationResponse(invite.id, 'declined')}>Decline</button>
+                    </li>
+                ))}
+            </ul>
+        </div>
     )
 }
 
