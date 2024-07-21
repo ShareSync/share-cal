@@ -18,6 +18,14 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
     const {user_id} = req.params;
     const {title, startAt, endAt, description, location, allDay, invitees} = req.body;
     try {
+        // Retrieve the organizer's email
+        const organizer = await prisma.user.findUnique({
+            where: { id: parseInt(user_id) },
+            select: { email: true }
+        });
+        // Filter out the organizer's email from invitees if present
+        const filteredInvitees = invitees.filter(email => email !== organizer.email);
+
         // Creates Organizer's Personal Event Or Creates Personal Event
         const masterEvent = await prisma.calendarEvent.create({
         data: {
@@ -37,11 +45,11 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
       });
 
       // For Creation of Shared Events were invitees are provided
-      if (invitees && invitees.length > 0) {
+      if (filteredInvitees.length > 0) {
         const inviteeUsers = await prisma.user.findMany({
             where: {
                 email: {
-                    in: invitees,
+                    in: filteredInvitees,
                 },
             },
             select: {
@@ -49,13 +57,12 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
             },
         });
 
-        if (inviteeUsers.length !== invitees.length) {
+        if (inviteeUsers.length !== filteredInvitees.length) {
             await prisma.calendarEvent.delete({
                 where: {id: parseInt(masterEvent.id)}
             });
             return res.status(400).json({ error: 'One or more invitees not found'});
         }
-
         // Creates events for invitees
         const inviteeEvents = inviteeUsers.map(invitee => {
             return {
