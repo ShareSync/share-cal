@@ -86,9 +86,10 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
                     <p> Event Location</p>
                     <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Event Location"/>
 
-
+                    {!isEdit && <>
                     <p>Event Participants</p>
                     <input type="text" value={participants} onChange={(e) => setParticipants(e.target.value)} placeholder="Attendees"/>
+                    </>}
 
                     <div id="form-button">
                         <button onClick={onClose} type="button">Cancel</button>

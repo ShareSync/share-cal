@@ -44,6 +44,16 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
         },
       });
 
+      // Updates masterEventId field for Personal Event
+      await prisma.calendarEvent.update({
+        where: {
+            id: masterEvent.id
+        },
+        data: {
+            masterEventId: masterEvent.id.toString()
+        }
+    });
+
       // For Creation of Shared Events were invitees are provided
       if (filteredInvitees.length > 0) {
         const inviteeUsers = await prisma.user.findMany({
@@ -141,8 +151,8 @@ router.put('/events/:id', authenticateToken, async (req, res) => {
     const {id} = req.params;
     const {title, startAt, endAt, description, location, allDay} = req.body;
     try {
-        const updatedEvent = await prisma.calendarEvent.update({
-            where: { id: parseInt(id) },
+        const updatedEvent = await prisma.calendarEvent.updateMany({
+            where: { masterEventId: id },
             data: {
                 title,
                 startAt,

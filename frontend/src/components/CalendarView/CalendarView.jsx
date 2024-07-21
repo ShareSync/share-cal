@@ -236,7 +236,7 @@ function CalendarView () {
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     events={events.map(event => ({
-                      id: event.id,
+                      id: event.masterEventId,
                       title: event.title,
                       start: event.startAt,
                       end: event.endAt,
@@ -244,8 +244,8 @@ function CalendarView () {
                       extendedProps: {
                         description: event.description,
                         location: event.location,
-                        status: event.status
-                      }
+                        status: event.status,
+                      },
                     }))}
                     headerToolbar={{
                       left:'prev,next today',
