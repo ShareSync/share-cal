@@ -95,7 +95,8 @@ const createCalendarEvent = async (calendarEvent, userId, fetchCurrentUser, upda
         }
       const response = await fetch(`${backendUrlAccess}/calendar/${userId}/events`, options);
       if (!response.ok) {
-        throw new Error('Something went wrong!');
+        const errorData = await response.json(); // Parse JSON to get the error message
+        throw new Error(errorData.error || 'Something went wrong!');
       }
       fetchCurrentUser();
     } catch (error) {
@@ -165,7 +166,7 @@ async function fetchInvitations(setInvitations) {
 }
 
 // API Call for Responding to Event Invitations
-async function respondToInvitation(eventId, status, setInvitations, invitations){
+async function respondToInvitation(eventId, status){
   try {
     const inviteResponse = {
       status
@@ -180,7 +181,6 @@ async function respondToInvitation(eventId, status, setInvitations, invitations)
         };
     const response = await fetch(`${backendUrlAccess}/calendar/events/${eventId}/respond`, options);
     const data = await response.json();
-    setInvitations(invitations.filter(invite => invite.id !== eventId));
   } catch (error) {
     console.error('Error responding to invitation:', error);
   }

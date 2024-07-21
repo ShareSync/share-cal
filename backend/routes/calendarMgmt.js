@@ -50,6 +50,9 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
         });
 
         if (inviteeUsers.length !== invitees.length) {
+            await prisma.calendarEvent.delete({
+                where: {id: parseInt(masterEvent.id)}
+            });
             return res.status(400).json({ error: 'One or more invitees not found'});
         }
 

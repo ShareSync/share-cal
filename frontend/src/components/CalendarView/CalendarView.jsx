@@ -51,9 +51,13 @@ function CalendarView () {
     });
 
     // Handles Event Creation
-    const handleEventSubmit = (eventData) => {
-        createCalendarEvent(eventData, userInfo.id, fetchCurrentUser, updateUser);
-        setIsModalOpen(false);
+    const handleEventSubmit = async (eventData) => {
+        try{
+          await createCalendarEvent(eventData, userInfo.id, fetchCurrentUser, updateUser);
+          setIsModalOpen(false);
+        } catch (error) {
+          alert(error.message);
+        }
     }
 
     // Handles Parsed Events from uploaded .ics file
@@ -107,7 +111,8 @@ function CalendarView () {
         end: info.event.end,
         allDay: info.event.allDay,
         location: info.event.extendedProps.location,
-        description: info.event.extendedProps.description
+        description: info.event.extendedProps.description,
+        status: info.event.extendedProps.status
       })
       setIsDetailModalOpen(true);
     }

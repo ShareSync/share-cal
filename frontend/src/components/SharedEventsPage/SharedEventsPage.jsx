@@ -9,6 +9,10 @@ function SharedEventsPage () {
         fetchInvitations(setInvitations);
     }, []);
 
+    const handleInvitationResponse = (eventId, status) => {
+        respondToInvitation(eventId, status);
+        setInvitations(invitations.filter(invite => invite.id !== eventId));
+    }
     return (
         <div>
             <h2>Here are the events that have been shared with you</h2>
@@ -16,8 +20,8 @@ function SharedEventsPage () {
                 {invitations.map(invite => (
                     <li key={invite.id}>
                         <p>{invite.title}</p>
-                        <button onClick={() => respondToInvitation(invite.id, 'accepted', setInvitations, invitations)}>Accept</button>
-                        <button onClick={() => respondToInvitation(invite.id, 'declined', setInvitations, invitations)}>Decline</button>
+                        <button onClick={() => handleInvitationResponse(invite.id, 'accepted')}>Accept</button>
+                        <button onClick={() => handleInvitationResponse(invite.id, 'declined')}>Decline</button>
                     </li>
                 ))}
             </ul>
