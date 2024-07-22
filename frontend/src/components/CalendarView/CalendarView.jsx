@@ -52,6 +52,7 @@ function CalendarView () {
 
     // Handles Event Creation
     const handleEventSubmit = async (eventData) => {
+      eventData.source = 'personal';
         try{
           await createCalendarEvent(eventData, userInfo.id, fetchCurrentUser, updateUser);
           setIsModalOpen(false);
