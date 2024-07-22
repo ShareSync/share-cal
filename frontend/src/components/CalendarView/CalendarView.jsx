@@ -128,18 +128,36 @@ function CalendarView () {
           allDay: info.event.allDay
         }
         const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-        const options = {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'},
-        body: JSON.stringify(updatedEvent),
-        credentials: 'include'
-          };
-        const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
-        if (!response.ok) {
-          throw new Error('Something went wrong!');
+
+        // Handles for Editing Google Calendar Events
+        if (info.event.extendedProps.source === 'google'){
+          const options = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'},
+            body: JSON.stringify({updatedEventData: updatedEvent}),
+            credentials: 'include'
+              };
+          const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
+          if (!response.ok) {
+            throw new Error('Something went wrong!');
+          }
+        } else { // Handles Editing for Other Event Types (Personal, ICS)
+          const options = {
+          method: 'PUT',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'},
+          body: JSON.stringify(updatedEvent),
+          credentials: 'include'
+            };
+          const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
+          if (!response.ok) {
+            throw new Error('Something went wrong!');
+          }
         }
+
         fetchCurrentUser();
       } catch (error) {
         console.error('Failed to update calendar event: ', error);
@@ -195,7 +213,8 @@ function CalendarView () {
         end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
         allDay: info.allDay,
         description: info.description,
-        location: info.location
+        location: info.location,
+        source: info.extendedProps.source
       }
       setInitialView(editInfo);
       setIsModalOpen(true);
@@ -245,7 +264,8 @@ function CalendarView () {
                         description: event.description,
                         location: event.location,
                         status: event.status,
-                        masterEventId: event.masterEventId
+                        masterEventId: event.masterEventId,
+                        source: event.source
                       },
                     }))}
                     headerToolbar={{

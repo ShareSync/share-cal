@@ -131,8 +131,9 @@ router.get('/sync', authenticateToken, async (req, res) => {
     }
 })
 
-router.post('/update-event', authenticateToken, async (req, res) => {
-    const { eventId, updatedEventData } = req.body; // Assume these are passed from the frontend
+router.post('/update-event/:eventId', authenticateToken, async (req, res) => {
+    const {eventId} = req.params;
+    const { updatedEventData } = req.body;
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
     });
@@ -160,7 +161,7 @@ router.post('/update-event', authenticateToken, async (req, res) => {
                 description: updatedEventData.description,
                 start: {
                     dateTime: updatedEventData.startAt,
-                    timeZone: 'America/Los_Angeles' // TODO: Revisit whether to handle
+                    timeZone: 'America/Los_Angeles'
                 },
                 end: {
                     dateTime: updatedEventData.endAt,
