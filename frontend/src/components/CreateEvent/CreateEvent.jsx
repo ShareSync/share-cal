@@ -25,7 +25,8 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
             invitees: participants
             ? participants.split(',').map(email => email.trim()).filter(email => email !== '')
             : [],
-            source: 'personal',
+            source: initialView.source,
+            masterEventId: initialView.masterEventId
         };
         if (isEdit){
             onEdit(eventData, initialView.id);
