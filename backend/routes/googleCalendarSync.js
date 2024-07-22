@@ -75,9 +75,54 @@ router.get('/sync', authenticateToken, async (req, res) => {
             location: event.location || '',
             allDay: Boolean(!event.start.dateTime && !event.end.dateTime && event.start.date && event.end.date),
             userId: req.user.id,
-            // TODO: to implement masterEventId from change in Prisma Schema in a future commit
+            source: 'google',
+            masterEventId: event.id
         }));
-        await prisma.calendarEvent.createMany({ data: parsedEvents});
+
+        // Creates/Updates the Google Calendar Events with Prisma
+        for (const event of parsedEvents) {
+            try {
+                const existingEvent = await prisma.calendarEvent.findFirst({
+                    where: { masterEventId: event.masterEventId }
+                });
+                if (existingEvent) {
+                    await prisma.calendarEvent.update({
+                        where: { id: existingEvent.id },
+                        data: {
+                            title: event.title,
+                            startAt: event.startAt,
+                            endAt: event.endAt,
+                            description: event.description,
+                            location: event.location,
+                            allDay: event.allDay,
+                            source: event.source,
+                        }
+                    });
+                } else {
+                    await prisma.calendarEvent.create({
+                        data: {
+                            masterEventId: event.masterEventId,
+                            title: event.title,
+                            startAt: event.startAt,
+                            endAt: event.endAt,
+                            description: event.description,
+                            location: event.location,
+                            allDay: event.allDay,
+                            user: {
+                                connect: {
+                                    id: req.user.id
+                                }
+                            },
+                            status: 'accepted',
+                            source: event.source,
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error(`Error processing event ${event.masterEventId}:`, error);
+            }
+        }
+
         res.json({ message: 'Done Syncing Calendar Events'});
 
     } catch (error) {
