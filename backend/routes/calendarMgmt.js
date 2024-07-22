@@ -16,7 +16,7 @@ const upload = multer({ dest: 'uploads/' });
 // API Endpoint for Adding New Calendar Events
 router.post('/:user_id/events', authenticateToken, async (req, res) => {
     const {user_id} = req.params;
-    const {title, startAt, endAt, description, location, allDay, invitees} = req.body;
+    const {title, startAt, endAt, description, location, allDay, invitees = [], source, masterEventId} = req.body;
     try {
         // Retrieve the organizer's email
         const organizer = await prisma.user.findUnique({
@@ -26,6 +26,7 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
         // Filter out the organizer's email from invitees if present
         const filteredInvitees = invitees.filter(email => email !== organizer.email);
 
+        if (source === 'personal') {
         // Creates Organizer's Personal Event Or Creates Personal Event
         const masterEvent = await prisma.calendarEvent.create({
         data: {
@@ -43,6 +44,16 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
             status: 'accepted',
         },
       });
+
+      // Updates masterEventId field for Personal Event
+      await prisma.calendarEvent.update({
+        where: {
+            id: masterEvent.id
+        },
+        data: {
+            masterEventId: source === 'personal' ? masterEvent.id.toString() : masterEventId
+        }
+    });
 
       // For Creation of Shared Events were invitees are provided
       if (filteredInvitees.length > 0) {
@@ -84,6 +95,44 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
       }
 
       res.json({ event: masterEvent });
+    } else {
+        const existingEvent = await prisma.calendarEvent.findFirst({
+            where: { masterEventId }
+        });
+        if (existingEvent) {
+            // Update the existing event
+            return await prisma.calendarEvent.update({
+                where: { id: existingEvent.id },
+                data: {
+                    title,
+                    startAt,
+                    endAt,
+                    description,
+                    location,
+                    allDay,
+                }
+            });
+        } else {
+            // Create a new event
+            return await prisma.calendarEvent.create({
+                data: {
+                    masterEventId,
+                    title,
+                    startAt,
+                    endAt,
+                    description,
+                    location,
+                    allDay,
+                    user: {
+                        connect: {
+                            id: parseInt(user_id)
+                        }
+                    },
+                    status: 'accepted',
+                }
+            });
+        }
+    }
     } catch (error) {
         console.error("Error creating event:", error);
         res.status(500).json({ error: 'Server error' });
@@ -141,8 +190,8 @@ router.put('/events/:id', authenticateToken, async (req, res) => {
     const {id} = req.params;
     const {title, startAt, endAt, description, location, allDay} = req.body;
     try {
-        const updatedEvent = await prisma.calendarEvent.update({
-            where: { id: parseInt(id) },
+        const updatedEvent = await prisma.calendarEvent.updateMany({
+            where: { masterEventId: id },
             data: {
                 title,
                 startAt,
@@ -187,7 +236,9 @@ router.post('/import-ics', authenticateToken, upload.single('ics'), async (req, 
             endAt: new Date(event.end),
             location: event.location || '',
             allDay: event.allDay || false,
-            userId: req.user.id
+            userId: req.user.id,
+            source: 'ics',
+            masterEventId: event.uid
         }));
 
         fs.unlinkSync(filePath);

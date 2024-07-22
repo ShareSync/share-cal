@@ -75,9 +75,54 @@ router.get('/sync', authenticateToken, async (req, res) => {
             location: event.location || '',
             allDay: Boolean(!event.start.dateTime && !event.end.dateTime && event.start.date && event.end.date),
             userId: req.user.id,
-            // TODO: to implement masterEventId from change in Prisma Schema in a future commit
+            source: 'google',
+            masterEventId: event.id
         }));
-        await prisma.calendarEvent.createMany({ data: parsedEvents});
+
+        // Creates/Updates the Google Calendar Events with Prisma
+        for (const event of parsedEvents) {
+            try {
+                const existingEvent = await prisma.calendarEvent.findFirst({
+                    where: { masterEventId: event.masterEventId }
+                });
+                if (existingEvent) {
+                    await prisma.calendarEvent.update({
+                        where: { id: existingEvent.id },
+                        data: {
+                            title: event.title,
+                            startAt: event.startAt,
+                            endAt: event.endAt,
+                            description: event.description,
+                            location: event.location,
+                            allDay: event.allDay,
+                            source: event.source,
+                        }
+                    });
+                } else {
+                    await prisma.calendarEvent.create({
+                        data: {
+                            masterEventId: event.masterEventId,
+                            title: event.title,
+                            startAt: event.startAt,
+                            endAt: event.endAt,
+                            description: event.description,
+                            location: event.location,
+                            allDay: event.allDay,
+                            user: {
+                                connect: {
+                                    id: req.user.id
+                                }
+                            },
+                            status: 'accepted',
+                            source: event.source,
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error(`Error processing event ${event.masterEventId}:`, error);
+            }
+        }
+
         res.json({ message: 'Done Syncing Calendar Events'});
 
     } catch (error) {
@@ -85,5 +130,70 @@ router.get('/sync', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Failed to sync Google Calendar events' });
     }
 })
+
+router.post('/update-event/:eventId', authenticateToken, async (req, res) => {
+    const {eventId} = req.params;
+    const { updatedEventData } = req.body;
+    const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+    });
+
+    if (!user || !user.accessToken || !user.refreshToken) {
+        return res.status(401).send('Not authenticated with Google');
+    }
+
+    // Set up the OAuth2 client with the user's credentials
+    oauth2Client.setCredentials({
+        access_token: user.accessToken,
+        refresh_token: user.refreshToken,
+        expiry_date: user.tokenExpiry.getTime(),
+    });
+
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+    try {
+        // Call the Google Calendar API to update the event
+        const response = await calendar.events.update({
+            calendarId: 'primary',
+            eventId: eventId, // the ID of the event to update
+            requestBody: {
+                summary: updatedEventData.title,
+                description: updatedEventData.description,
+                start: {
+                    dateTime: updatedEventData.startAt,
+                    timeZone: 'America/Los_Angeles'
+                },
+                end: {
+                    dateTime: updatedEventData.endAt,
+                    timeZone: 'America/Los_Angeles'
+                },
+                location: updatedEventData.location,
+            },
+        });
+
+        const existingEvent = await prisma.calendarEvent.findFirst({
+            where: { masterEventId: eventId }
+        });
+
+        if (existingEvent) {
+            const updatedEvent = await prisma.calendarEvent.update({
+                where: { id: existingEvent.id },
+                data: {
+                    title: updatedEventData.title,
+                    startAt: updatedEventData.startAt,
+                    endAt: updatedEventData.endAt,
+                    description: updatedEventData.description,
+                    location: updatedEventData.location,
+                    allDay: updatedEventData.allDay,
+                }
+            });
+        }
+
+        res.json({ message: 'Event updated successfully', event: response.data });
+    } catch (error) {
+        console.error('Failed to update Google Calendar event', error);
+        res.status(500).json({ error: 'Failed to update event' });
+    }
+});
 
 module.exports  = router;

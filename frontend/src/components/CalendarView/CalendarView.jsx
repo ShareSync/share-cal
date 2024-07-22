@@ -112,11 +112,14 @@ function CalendarView () {
         allDay: info.event.allDay,
         location: info.event.extendedProps.location,
         description: info.event.extendedProps.description,
-        status: info.event.extendedProps.status
+        status: info.event.extendedProps.status,
+        source: info.event.extendedProps.source,
+        masterEventId: info.event.extendedProps.masterEventId
       })
       setIsDetailModalOpen(true);
     }
 
+    // Handles Drag & Drop, Resize actions with FullCalendarUI
     const handleEventEdit = async (info) => {
       try {
         const updatedEvent = {
@@ -128,18 +131,36 @@ function CalendarView () {
           allDay: info.event.allDay
         }
         const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-        const options = {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'},
-        body: JSON.stringify(updatedEvent),
-        credentials: 'include'
-          };
-        const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
-        if (!response.ok) {
-          throw new Error('Something went wrong!');
+
+        // Handles for Editing Google Calendar Events
+        if (info.event.extendedProps.source === 'google'){
+          const options = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'},
+            body: JSON.stringify({updatedEventData: updatedEvent}),
+            credentials: 'include'
+              };
+          const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
+          if (!response.ok) {
+            throw new Error('Something went wrong!');
+          }
+        } else { // Handles Editing for Other Event Types (Personal, ICS)
+          const options = {
+          method: 'PUT',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'},
+          body: JSON.stringify(updatedEvent),
+          credentials: 'include'
+            };
+          const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
+          if (!response.ok) {
+            throw new Error('Something went wrong!');
+          }
         }
+
         fetchCurrentUser();
       } catch (error) {
         console.error('Failed to update calendar event: ', error);
@@ -161,18 +182,34 @@ function CalendarView () {
           allDay: info.allDay
         }
         const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-        const options = {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'},
-        body: JSON.stringify(updatedEvent),
-        credentials: 'include'
-          };
-        const response = await fetch(`${backendUrlAccess}/calendar/events/${id}`, options);
-        if (!response.ok) {
-          throw new Error('Something went wrong!');
+        if (info.source === 'google'){ // Makes API Call for Google events
+          const options = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'},
+            body: JSON.stringify({updatedEventData: updatedEvent}),
+            credentials: 'include'
+              };
+          const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.masterEventId}`, options);
+          if (!response.ok) {
+            throw new Error('Something went wrong!');
+          }
+        } else { //Makes API Call for non-Google events
+          const options = {
+          method: 'PUT',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'},
+          body: JSON.stringify(updatedEvent),
+          credentials: 'include'
+            };
+          const response = await fetch(`${backendUrlAccess}/calendar/events/${id}`, options);
+          if (!response.ok) {
+            throw new Error('Something went wrong!');
+          }
         }
+
         fetchCurrentUser();
         setIsModalOpen(false);
       } catch (error) {
@@ -195,7 +232,9 @@ function CalendarView () {
         end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
         allDay: info.allDay,
         description: info.description,
-        location: info.location
+        location: info.location,
+        source: info.source,
+        masterEventId: info.masterEventId,
       }
       setInitialView(editInfo);
       setIsModalOpen(true);
@@ -244,8 +283,10 @@ function CalendarView () {
                       extendedProps: {
                         description: event.description,
                         location: event.location,
-                        status: event.status
-                      }
+                        status: event.status,
+                        masterEventId: event.masterEventId,
+                        source: event.source
+                      },
                     }))}
                     headerToolbar={{
                       left:'prev,next today',
