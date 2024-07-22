@@ -215,10 +215,30 @@ function getReadableTimeStr(dateTime) {
     return `${readableHours % 12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
 }
 
+function slotToTime(slot) {
+  const hours = Math.floor(slot / 2);
+  const minutes = (slot % 2) * 30;
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  return `${formattedHours}:${formattedMinutes}`;
+}
+
+function getTomorrowsDate(currentDateString) {
+  // Parse the current date string as a UTC date
+  const currentDate = new Date(currentDateString + 'T00:00:00Z');
+  // Add one day using UTC methods
+  currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+  // Format the date back to "YYYY-MM-DD" using UTC methods
+  const year = currentDate.getUTCFullYear();
+  const month = (currentDate.getUTCMonth() + 1).toString().padStart(2, '0'); // getUTCMonth() is zero-based
+  const day = currentDate.getUTCDate().toString().padStart(2, '0');
+  const formattedDate = `${year}-${month}-${day}`;
+  return formattedDate;
+}
 export {
     handleSignUp, handleLogin, handleOnLogout,
     handleICSParsing,
     createCalendarEvent, handleEventDelete,
     fetchInvitations, respondToInvitation,
-    getDateString, getTimeString, getReadableDateStr, getReadableTimeStr
+    getDateString, getTimeString, getReadableDateStr, getReadableTimeStr, slotToTime, getTomorrowsDate
 };

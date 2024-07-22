@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middlewares/authenticateToken');
+const {recommendEventSlots} = require('../recommendation');
 
 // Libraries for Parsing .ics data
 const fs = require('fs');
@@ -250,4 +251,25 @@ router.post('/import-ics', authenticateToken, upload.single('ics'), async (req, 
     }
 });
 
+router.post('/recommend-time-slots', authenticateToken, async (req, res) => {
+    try {
+        const { duration, invitees, targetDate } = req.body; // Ensure duration is included in the body
+        const userId = req.user.id;
+        // Ensure targetDate is provided
+        if (!targetDate) {
+            return res.status(400).json({ error: 'Target date is required' });
+        }
+        // Parse targetDate to ensure it's a valid date
+        const parsedDate = new Date(targetDate);
+        if (isNaN(parsedDate)) {
+            return res.status(400).json({ error: 'Invalid date provided' });
+        }
+        // Call the recommendation function with the correct parameters
+        const recommendations = await recommendEventSlots(userId, duration, targetDate, invitees);
+        res.json({ recommendations });
+    } catch (error) {
+        console.error('Error recommending time slots:', error);
+        res.status(500).json({ error: 'Failed to recommend time slots' });
+    }
+});
 module.exports = router;
