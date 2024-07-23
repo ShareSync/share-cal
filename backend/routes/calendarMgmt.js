@@ -28,96 +28,9 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
         const filteredInvitees = invitees.filter(email => email !== organizer.email);
 
         if (source === 'personal') {
-        // Creates Organizer's Personal Event Or Creates Personal Event
-        const masterEvent = await prisma.calendarEvent.create({
-        data: {
-            title,
-            startAt,
-            endAt,
-            description,
-            location,
-            allDay,
-            user: {
-                connect: {
-                    id: parseInt(user_id)
-                }
-            },
-            status: 'accepted',
-        },
-      });
-
-      // Updates masterEventId field for Personal Event
-      await prisma.calendarEvent.update({
-        where: {
-            id: masterEvent.id
-        },
-        data: {
-            masterEventId: source === 'personal' ? masterEvent.id.toString() : masterEventId
-        }
-    });
-
-      // For Creation of Shared Events were invitees are provided
-      if (filteredInvitees.length > 0) {
-        const inviteeUsers = await prisma.user.findMany({
-            where: {
-                email: {
-                    in: filteredInvitees,
-                },
-            },
-            select: {
-                id: true,
-            },
-        });
-
-        if (inviteeUsers.length !== filteredInvitees.length) {
-            await prisma.calendarEvent.delete({
-                where: {id: parseInt(masterEvent.id)}
-            });
-            return res.status(400).json({ error: 'One or more invitees not found'});
-        }
-        // Creates events for invitees
-        const inviteeEvents = inviteeUsers.map(invitee => {
-            return {
-                title,
-                startAt,
-                endAt,
-                description,
-                location,
-                allDay,
-                userId: invitee.id,
-                masterEventId: masterEvent.id.toString(),
-                status: 'pending',
-            };
-        });
-
-        await prisma.calendarEvent.createMany({
-            data: inviteeEvents,
-        });
-      }
-
-      res.json({ event: masterEvent });
-    } else {
-        const existingEvent = await prisma.calendarEvent.findFirst({
-            where: { masterEventId }
-        });
-        if (existingEvent) {
-            // Update the existing event
-            return await prisma.calendarEvent.update({
-                where: { id: existingEvent.id },
+            // Creates Organizer's Personal Event Or Creates Personal Event
+            const masterEvent = await prisma.calendarEvent.create({
                 data: {
-                    title,
-                    startAt,
-                    endAt,
-                    description,
-                    location,
-                    allDay,
-                }
-            });
-        } else {
-            // Create a new event
-            return await prisma.calendarEvent.create({
-                data: {
-                    masterEventId,
                     title,
                     startAt,
                     endAt,
@@ -125,15 +38,88 @@ router.post('/:user_id/events', authenticateToken, async (req, res) => {
                     location,
                     allDay,
                     user: {
-                        connect: {
-                            id: parseInt(user_id)
-                        }
+                        connect: { id: parseInt(user_id) }
                     },
                     status: 'accepted',
+                },
+            });
+
+            // Updates masterEventId field for Personal Event
+            await prisma.calendarEvent.update({
+                where: { id: masterEvent.id },
+                data: {
+                    masterEventId: source === 'personal' ? masterEvent.id.toString() : masterEventId
                 }
             });
+
+            // For Creation of Shared Events were invitees are provided
+            if (filteredInvitees.length > 0) {
+                const inviteeUsers = await prisma.user.findMany({
+                    where: { email: { in: filteredInvitees } },
+                    select: { id: true },
+                });
+
+                if (inviteeUsers.length !== filteredInvitees.length) {
+                    await prisma.calendarEvent.delete({
+                        where: { id: parseInt(masterEvent.id) }
+                    });
+                    return res.status(400).json({ error: 'One or more invitees not found'});
+                }
+
+                // Creates events for invitees
+                const inviteeEvents = inviteeUsers.map(invitee => {
+                    return {
+                        title,
+                        startAt,
+                        endAt,
+                        description,
+                        location,
+                        allDay,
+                        userId: invitee.id,
+                        masterEventId: masterEvent.id.toString(),
+                        status: 'pending',
+                    };
+                });
+
+                await prisma.calendarEvent.createMany({ data: inviteeEvents });
+            }
+            res.json({ event: masterEvent });
+        } else {
+            const existingEvent = await prisma.calendarEvent.findFirst({
+                where: { masterEventId }
+            });
+            if (existingEvent) {
+                // Update the existing event
+                return await prisma.calendarEvent.update({
+                    where: { id: existingEvent.id },
+                    data: {
+                        title,
+                        startAt,
+                        endAt,
+                        description,
+                        location,
+                        allDay,
+                    }
+                });
+            } else {
+                // Create a new event
+                return await prisma.calendarEvent.create({
+                    data: {
+                        masterEventId,
+                        title,
+                        startAt,
+                        endAt,
+                        description,
+                        location,
+                        allDay,
+                        user: {
+                            connect: { id: parseInt(user_id) }
+                        },
+                        status: 'accepted',
+                    }
+                });
+            }
         }
-    }
     } catch (error) {
         console.error("Error creating event:", error);
         res.status(500).json({ error: 'Server error' });
@@ -253,7 +239,7 @@ router.post('/import-ics', authenticateToken, upload.single('ics'), async (req, 
 
 router.post('/recommend-time-slots', authenticateToken, async (req, res) => {
     try {
-        const { duration, invitees, targetDate } = req.body; // Ensure duration is included in the body
+        const { duration, invitees, targetDate } = req.body;
         const userId = req.user.id;
         // Ensure targetDate is provided
         if (!targetDate) {

@@ -10,10 +10,12 @@ function Header () {
 
     return (
         <div id ="header">
-            <img id="app-logo" src="/logo.jpg" alt="logo" />
-            <h1>ShareCal</h1>
+            <div id='header-logo' onClick={() => navigate(`/`)}>
+                <img id="app-logo" src="/logo.jpg" alt="logo" />
+                <h1>ShareCal</h1>
+            </div>
             <button onClick={() => navigate(`/shared-events`)}>Shared Events</button>
-            <button onClick={() => handleOnLogout(updateUser)}>Log out</button>
+            <button onClick={() => handleOnLogout(updateUser, navigate)}>Log out</button>
         </div>
     )
 }

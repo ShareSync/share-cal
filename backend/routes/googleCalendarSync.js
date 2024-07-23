@@ -79,7 +79,7 @@ router.get('/sync', authenticateToken, async (req, res) => {
             masterEventId: event.id
         }));
 
-        // Creates/Updates the Google Calendar Events with Prisma
+        // Creates/Updates the Google Calendar Events into Database via Prisma
         for (const event of parsedEvents) {
             try {
                 const existingEvent = await prisma.calendarEvent.findFirst({

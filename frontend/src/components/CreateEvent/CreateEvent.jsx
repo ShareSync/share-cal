@@ -80,7 +80,7 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content">
+            <div className="modal-content-ce">
                 <form onSubmit={handleSubmit}>
                     <h1>Create a New Event</h1>
 

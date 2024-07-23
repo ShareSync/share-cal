@@ -10,7 +10,7 @@ import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import EventDetail from "../EventDetail/EventDetail.jsx";
 
 // Importing helper functions
-import { createCalendarEvent, getDateString, getTimeString } from "../../utils/utils.js";
+import { fetchCurrentUser, createCalendarEvent, getDateString, getTimeString } from "../../utils/utils.js";
 
 //Importing FullCalendar Library
 import FullCalendar from '@fullcalendar/react';
@@ -55,7 +55,7 @@ function CalendarView () {
     const handleEventSubmit = async (eventData) => {
       eventData.source = 'personal';
         try{
-          await createCalendarEvent(eventData, userInfo.id, fetchCurrentUser, updateUser);
+          await createCalendarEvent(eventData, userInfo.id, () => fetchCurrentUser(setIsLoading, updateUser, setEvents), updateUser);
           setIsModalOpen(false);
         } catch (error) {
           alert(error.message);
@@ -64,38 +64,16 @@ function CalendarView () {
 
     // Handles Parsed Events from uploaded .ics file
     const handleParsedEvents = (parsedEvents) => {
+      setIsLoading(true);
       parsedEvents.forEach(event => {
         createCalendarEvent(event, userInfo.id, fetchCurrentUser, updateUser);
       })
+      fetchCurrentUser(setIsLoading, updateUser, setEvents);
+      setIsLoading(false);
     }
 
-    // Handles Fetching Logged In User's Information
-    const fetchCurrentUser = async () => {
-        try {
-          setIsLoading(true)
-          const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-          const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
-
-          if (response.status === 401) {
-            updateUser(null);
-            setIsLoading(false);
-            return;
-          }
-
-          const data = await response.json();
-          updateUser(data.user);
-          setEvents(data.user.calendarEvents);
-          setIsLoading(false);
-        } catch (error) {
-          console.error('Failed to fetch current user', error);
-          if (error.response && error.response.status === 401 ) {
-            updateUser(null);
-          }
-        }
-      };
-
     useEffect(() => {
-        fetchCurrentUser();
+        fetchCurrentUser(setIsLoading, updateUser, setEvents);
       }, []);
 
 
@@ -110,6 +88,7 @@ function CalendarView () {
       setIsModalOpen(true);
     }
 
+    // Triggers Detailed View to show
     const handleEventSelect = (info) => {
       setDetailView({
         id: info.event.id,
@@ -168,7 +147,7 @@ function CalendarView () {
           }
         }
 
-        fetchCurrentUser();
+        fetchCurrentUser(setIsLoading, updateUser, setEvents);
       } catch (error) {
         console.error('Failed to update calendar event: ', error);
         if (error.response && error.response.status === 401 ) {
@@ -217,7 +196,7 @@ function CalendarView () {
           }
         }
 
-        fetchCurrentUser();
+        fetchCurrentUser(setIsLoading, updateUser, setEvents);
         setIsModalOpen(false);
       } catch (error) {
         console.error('Failed to update calendar event: ', error);
@@ -282,6 +261,7 @@ function CalendarView () {
                     height={"70vh"}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
+                    nowIndicator='true'
                     events={events.map(event => ({
                       id: event.id,
                       title: event.title,
@@ -313,7 +293,7 @@ function CalendarView () {
                   onClose={() => setIsDetailModalOpen(false)}
                   content={detailView}
                   handleEdit={() => handleEdit(detailView)}
-                  refetchEvents={fetchCurrentUser}
+                  refetchEvents={() => fetchCurrentUser(setIsLoading, updateUser, setEvents)}
                  />}
             </>
     )

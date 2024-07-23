@@ -7,3 +7,11 @@
     width: 100px;
     height: 100px;
 }
+
+#header-logo {
+    display: flex;
+}
+
+#header-logo:hover {
+    cursor: pointer;
+}

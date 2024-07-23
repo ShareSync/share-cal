@@ -65,7 +65,7 @@ async function handleLogin(userObj, updateUser, navigate) {
 }
 
 // API Call for Handling User Logout
-async function handleOnLogout(updateUser) {
+async function handleOnLogout(updateUser, navigate) {
     try{
         await fetch(`http://localhost:3000/auth/logout`, {
             method: 'POST',
@@ -75,9 +75,36 @@ async function handleOnLogout(updateUser) {
             credentials: 'include'
         });
         updateUser(null);
+        navigate('/');
     } catch (error) {
         alert('Error logging out:', error.message);
     }
+}
+
+// API Call for Fetching Current User
+async function fetchCurrentUser(setIsLoading, updateUser, setEvents) {
+  try {
+    setIsLoading(true)
+    const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
+    const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
+
+    if (response.status === 401) {
+      updateUser(null);
+      setIsLoading(false);
+      return;
+    }
+
+    const data = await response.json();
+    updateUser(data.user);
+    setEvents(data.user.calendarEvents);
+    setIsLoading(false);
+  } catch (error) {
+    console.error('Failed to fetch current user', error);
+    if (error.response && error.response.status === 401 ) {
+      updateUser(null);
+    }
+    setIsLoading(false);
+  }
 }
 
 // API Integrations for Calendar Management
@@ -236,7 +263,7 @@ function getTomorrowsDate(currentDateString) {
   return formattedDate;
 }
 export {
-    handleSignUp, handleLogin, handleOnLogout,
+    handleSignUp, handleLogin, handleOnLogout, fetchCurrentUser,
     handleICSParsing,
     createCalendarEvent, handleEventDelete,
     fetchInvitations, respondToInvitation,
