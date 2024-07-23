@@ -2,3 +2,16 @@
     display: flex;
     justify-content: space-between;
 }
+
+.loading-bar {
+    width: 100%;
+    height: 4px;
+    background-color: #3688D8;
+    animation: loading 1s linear infinite;
+    z-index: 1000;
+}
+
+@keyframes loading {
+    0% {transform: translateX(-100%);}
+    100% {transform: translateX(100%);}
+}

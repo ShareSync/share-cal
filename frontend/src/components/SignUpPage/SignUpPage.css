@@ -1,6 +1,22 @@
 #main-container {
+    height: 100vh;
+    margin: 0;
     display: flex;
-    border: 1px solid black;
     align-items: center;
     justify-content: center;
+}
+
+#img-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid black;
+    height: 100%;
+    width: 25%;
+    background-color: #9ab7c9;
+}
+
+#img-container > img {
+    height: 300px;
 }

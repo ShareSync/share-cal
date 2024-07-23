@@ -29,6 +29,7 @@ function CalendarView () {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [events, setEvents] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Handles View of the Event Creation/Editing Modal
     const [initialView, setInitialView] = useState({
@@ -67,19 +68,24 @@ function CalendarView () {
         createCalendarEvent(event, userInfo.id, fetchCurrentUser, updateUser);
       })
     }
+
+    // Handles Fetching Logged In User's Information
     const fetchCurrentUser = async () => {
         try {
+          setIsLoading(true)
           const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
           const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
 
           if (response.status === 401) {
             updateUser(null);
+            setIsLoading(false);
             return;
           }
 
           const data = await response.json();
           updateUser(data.user);
           setEvents(data.user.calendarEvents);
+          setIsLoading(false);
         } catch (error) {
           console.error('Failed to fetch current user', error);
           if (error.response && error.response.status === 401 ) {
@@ -270,6 +276,7 @@ function CalendarView () {
                     initialView={initialView}
                     isEdit={isEdit}
                 />}
+                {isLoading && <div className="loading-bar"></div>}
                 <div id="calendar-view">
                   <FullCalendar
                     height={"70vh"}
@@ -288,6 +295,7 @@ function CalendarView () {
                         masterEventId: event.masterEventId,
                         source: event.source
                       },
+                      backgroundColor: event.status === 'pending' ? '#5ea0e0' : '#3688D8'
                     }))}
                     headerToolbar={{
                       left:'prev,next today',

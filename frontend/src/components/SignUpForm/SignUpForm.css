@@ -1,8 +1,14 @@
 #login-form {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    border: 1px solid black;
+    width: 75%;
 }
 
+#login-form > form {
+    width: 50%;
+}
 button {
     display: block;
 }
