@@ -10,7 +10,7 @@ import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import EventDetail from "../EventDetail/EventDetail.jsx";
 
 // Importing helper functions
-import { createCalendarEvent, getDateString, getTimeString } from "../../utils/utils.js";
+import { fetchCurrentUser, createCalendarEvent, handleEventEdit, getDateString, getTimeString } from "../../utils/utils.js";
 
 //Importing FullCalendar Library
 import FullCalendar from '@fullcalendar/react';
@@ -29,6 +29,7 @@ function CalendarView () {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [events, setEvents] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Handles View of the Event Creation/Editing Modal
     const [initialView, setInitialView] = useState({
@@ -54,7 +55,7 @@ function CalendarView () {
     const handleEventSubmit = async (eventData) => {
       eventData.source = 'personal';
         try{
-          await createCalendarEvent(eventData, userInfo.id, fetchCurrentUser, updateUser);
+          await createCalendarEvent(eventData, userInfo.id, () => fetchCurrentUser(setIsLoading, updateUser, setEvents), updateUser);
           setIsModalOpen(false);
         } catch (error) {
           alert(error.message);
@@ -66,33 +67,10 @@ function CalendarView () {
       parsedEvents.forEach(event => {
         createCalendarEvent(event, userInfo.id, fetchCurrentUser, updateUser);
       })
+      fetchCurrentUser(setIsLoading, updateUser, setEvents);
     }
-    const fetchCurrentUser = async () => {
-        try {
-          const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-          const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
 
-          if (response.status === 401) {
-            updateUser(null);
-            return;
-          }
-
-          const data = await response.json();
-          updateUser(data.user);
-          setEvents(data.user.calendarEvents);
-        } catch (error) {
-          console.error('Failed to fetch current user', error);
-          if (error.response && error.response.status === 401 ) {
-            updateUser(null);
-          }
-        }
-      };
-
-    useEffect(() => {
-        fetchCurrentUser();
-      }, []);
-
-
+    // Handles When Date on Calendar is clicked
     const handleDateSelect = (info) => {
       setIsEdit(false);
       setInitialView({
@@ -104,6 +82,42 @@ function CalendarView () {
       setIsModalOpen(true);
     }
 
+    // Handles Opening of Edit Event Modal
+    const handleEdit = (info) => {
+      setIsDetailModalOpen(false);
+      setIsEdit(true);
+      const editInfo = {
+        id: info.id,
+        title: info.title,
+        date: getDateString(info.start),
+        start: getTimeString(info.start),
+        end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
+        allDay: info.allDay,
+        description: info.description,
+        location: info.location,
+        source: info.source,
+        masterEventId: info.masterEventId,
+      }
+      setInitialView(editInfo);
+      setIsModalOpen(true);
+    }
+
+    // Handles when New Event is Clicked
+    const handleNewEventClick = () => {
+      setInitialView({
+        title: "",
+        date: "",
+        start: "",
+        end: "",
+        allDay: false,
+        description: "",
+        location: ""
+      })
+      setIsModalOpen(true);
+      setIsEdit(false);
+    }
+
+    // Triggers Detailed View to show
     const handleEventSelect = (info) => {
       setDetailView({
         id: info.event.id,
@@ -120,57 +134,9 @@ function CalendarView () {
       setIsDetailModalOpen(true);
     }
 
-    // Handles Drag & Drop, Resize actions with FullCalendarUI
-    const handleEventEdit = async (info) => {
-      try {
-        const updatedEvent = {
-          title: info.event.title,
-          startAt: info.event.startStr,
-          endAt: info.event.endStr,
-          description: info.event.extendedProps.description,
-          location: info.event.extendedProps.location,
-          allDay: info.event.allDay
-        }
-        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-
-        // Handles for Editing Google Calendar Events
-        if (info.event.extendedProps.source === 'google'){
-          const options = {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'},
-            body: JSON.stringify({updatedEventData: updatedEvent}),
-            credentials: 'include'
-              };
-          const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
-          if (!response.ok) {
-            throw new Error('Something went wrong!');
-          }
-        } else { // Handles Editing for Other Event Types (Personal, ICS)
-          const options = {
-          method: 'PUT',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'},
-          body: JSON.stringify(updatedEvent),
-          credentials: 'include'
-            };
-          const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
-          if (!response.ok) {
-            throw new Error('Something went wrong!');
-          }
-        }
-
-        fetchCurrentUser();
-      } catch (error) {
-        console.error('Failed to update calendar event: ', error);
-        if (error.response && error.response.status === 401 ) {
-          updateUser(null);
-        }
-        throw error;
-      }
-    }
+    useEffect(() => {
+        fetchCurrentUser(setIsLoading, updateUser, setEvents);
+      }, []);
 
     const handleEventEditButton = async (info, id) => {
       try {
@@ -211,7 +177,7 @@ function CalendarView () {
           }
         }
 
-        fetchCurrentUser();
+        fetchCurrentUser(setIsLoading, updateUser, setEvents);
         setIsModalOpen(false);
       } catch (error) {
         console.error('Failed to update calendar event: ', error);
@@ -222,43 +188,11 @@ function CalendarView () {
       }
     }
 
-    const handleEdit = (info) => {
-      setIsDetailModalOpen(false);
-      setIsEdit(true);
-      const editInfo = {
-        id: info.id,
-        title: info.title,
-        date: getDateString(info.start),
-        start: getTimeString(info.start),
-        end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
-        allDay: info.allDay,
-        description: info.description,
-        location: info.location,
-        source: info.source,
-        masterEventId: info.masterEventId,
-      }
-      setInitialView(editInfo);
-      setIsModalOpen(true);
-    }
-
-    const newEventButton = () => {
-      setInitialView({
-        title: "",
-        date: "",
-        start: "",
-        end: "",
-        allDay: false,
-        description: "",
-        location: ""
-      })
-      setIsModalOpen(true);
-      setIsEdit(false);
-    }
     return (
             <>
                 <Header />
                 <div id="event-src">
-                  <button onClick={newEventButton}>New Event</button>
+                  <button onClick={handleNewEventClick}>New Event</button>
                   <ICSUpload onEventsImported={handleParsedEvents}/>
                   <GoogleCalendarSync />
                 </div>
@@ -270,11 +204,13 @@ function CalendarView () {
                     initialView={initialView}
                     isEdit={isEdit}
                 />}
+                {isLoading && <div className="loading-bar"></div>}
                 <div id="calendar-view">
                   <FullCalendar
                     height={"70vh"}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
+                    nowIndicator='true'
                     events={events.map(event => ({
                       id: event.id,
                       title: event.title,
@@ -288,6 +224,7 @@ function CalendarView () {
                         masterEventId: event.masterEventId,
                         source: event.source
                       },
+                      backgroundColor: event.status === 'pending' ? '#5ea0e0' : '#3688D8'
                     }))}
                     headerToolbar={{
                       left:'prev,next today',
@@ -298,18 +235,17 @@ function CalendarView () {
                     selectable={true}
                     select={handleDateSelect}
                     eventClick={handleEventSelect}
-                    eventChange={handleEventEdit}
+                    eventChange={(info) => handleEventEdit(info, updateUser)}
                   />
                 </div>
                 {isDetailModalOpen && <EventDetail
                   onClose={() => setIsDetailModalOpen(false)}
                   content={detailView}
                   handleEdit={() => handleEdit(detailView)}
-                  refetchEvents={fetchCurrentUser}
+                  refetchEvents={() => fetchCurrentUser(setIsLoading, updateUser, setEvents)}
                  />}
             </>
     )
 }
-
 
 export default CalendarView;

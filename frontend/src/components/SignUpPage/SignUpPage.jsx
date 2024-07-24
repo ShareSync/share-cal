@@ -4,12 +4,11 @@ import SignUpForm from "../SignUpForm/SignUpForm"
 function SignUpPage () {
     return (
         <div id="main-container">
-                <SignUpForm />
-                <div>
-                    <img src="https://placehold.co/100x100" alt="logo"/>
-                    <h1>ShareCal</h1>
-                </div>
+            <SignUpForm />
+            <div id='img-container'>
+                <img src="/logo.jpg" alt="logo"/>
             </div>
+        </div>
     )
 }
 

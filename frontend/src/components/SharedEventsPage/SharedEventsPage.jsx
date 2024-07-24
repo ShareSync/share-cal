@@ -1,6 +1,7 @@
 import "./SharedEventsPage.css"
 import { useState, useEffect } from "react";
 import { fetchInvitations, respondToInvitation } from "../../utils/utils";
+import Header from "../Header/Header"
 
 function SharedEventsPage () {
     const [invitations, setInvitations] = useState([]);
@@ -15,6 +16,7 @@ function SharedEventsPage () {
     }
     return (
         <div>
+            <Header />
             <h2>Here are the events that have been shared with you</h2>
             <ul>
                 {invitations.map(invite => (

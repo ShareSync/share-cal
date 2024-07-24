@@ -65,7 +65,7 @@ async function handleLogin(userObj, updateUser, navigate) {
 }
 
 // API Call for Handling User Logout
-async function handleOnLogout(updateUser) {
+async function handleOnLogout(updateUser, navigate) {
     try{
         await fetch(`http://localhost:3000/auth/logout`, {
             method: 'POST',
@@ -75,9 +75,36 @@ async function handleOnLogout(updateUser) {
             credentials: 'include'
         });
         updateUser(null);
+        navigate('/');
     } catch (error) {
         alert('Error logging out:', error.message);
     }
+}
+
+// API Call for Fetching Current User
+async function fetchCurrentUser(setIsLoading, updateUser, setEvents) {
+  try {
+    setIsLoading(true)
+    const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
+    const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
+
+    if (response.status === 401) {
+      updateUser(null);
+      setIsLoading(false);
+      return;
+    }
+
+    const data = await response.json();
+    updateUser(data.user);
+    setEvents(data.user.calendarEvents);
+    setIsLoading(false);
+  } catch (error) {
+    console.error('Failed to fetch current user', error);
+    if (error.response && error.response.status === 401 ) {
+      updateUser(null);
+    }
+    setIsLoading(false);
+  }
 }
 
 // API Integrations for Calendar Management
@@ -131,6 +158,58 @@ async function handleEventDelete(content, onClose, refetchEvents) {
     }
 }
 
+// API Call for Editing Events via Drag/Drop
+async function handleEventEdit(info, updateUser) {
+  try {
+    const updatedEvent = {
+      title: info.event.title,
+      startAt: info.event.startStr,
+      endAt: info.event.endStr,
+      description: info.event.extendedProps.description,
+      location: info.event.extendedProps.location,
+      allDay: info.event.allDay
+    }
+
+    // Handles for Editing Google Calendar Events
+    if (info.event.extendedProps.source === 'google'){
+      const options = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'},
+        body: JSON.stringify({updatedEventData: updatedEvent}),
+        credentials: 'include'
+          };
+      const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+    } else { // Handles Editing for Other Event Types (Personal, ICS)
+      const options = {
+      method: 'PUT',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+      body: JSON.stringify(updatedEvent),
+      credentials: 'include'
+        };
+      const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+    }
+
+  } catch (error) {
+    console.error('Failed to update calendar event: ', error);
+    if (error.response && error.response.status === 401 ) {
+      updateUser(null);
+    }
+    throw error;
+  }
+}
+
+// TODO: API Call for Editing Events via Manual Data Entry
+
 // API Call for Uploading a .ics File for Parsing
 async function handleICSParsing(formData, onEventsImported) {
     try{
@@ -154,6 +233,7 @@ async function handleICSParsing(formData, onEventsImported) {
     }
 }
 
+// Related to Shared Events
 // API Call for Fetching Event Invitations
 async function fetchInvitations(setInvitations) {
   try {
@@ -184,6 +264,27 @@ async function respondToInvitation(eventId, status){
   } catch (error) {
     console.error('Error responding to invitation:', error);
   }
+}
+
+async function fetchRecommendations(setRecommendations, duration, participants, date) {
+  const options = {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'},
+    body: JSON.stringify({
+        duration,
+        invitees: participants.split(',').map(email => email.trim()).filter(email => email !== ''),
+        targetDate: getTomorrowsDate(date)
+    }),
+    credentials: 'include'
+  };
+  const response = await fetch(`${backendUrlAccess}/calendar/recommend-time-slots`, options);
+  if (!response.ok) {
+      throw new Error('Something went wrong!');
+    }
+  const data = await response.json();
+  setRecommendations(data.recommendations);
 }
 
 // Helper Functions
@@ -236,9 +337,10 @@ function getTomorrowsDate(currentDateString) {
   return formattedDate;
 }
 export {
-    handleSignUp, handleLogin, handleOnLogout,
+    handleSignUp, handleLogin, handleOnLogout, fetchCurrentUser,
     handleICSParsing,
-    createCalendarEvent, handleEventDelete,
+    createCalendarEvent, handleEventDelete, handleEventEdit,
     fetchInvitations, respondToInvitation,
-    getDateString, getTimeString, getReadableDateStr, getReadableTimeStr, slotToTime, getTomorrowsDate
+    getDateString, getTimeString, getReadableDateStr, getReadableTimeStr, slotToTime, getTomorrowsDate,
+    fetchRecommendations
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserContext } from './UserContext';
+import './App.css'
 
 // Importing components to be used for page routing
 import LoginPage from './components/LoginPage/LoginPage';

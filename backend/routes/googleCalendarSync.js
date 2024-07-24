@@ -9,7 +9,7 @@ const { oauth2Client, SCOPES } = require('../middlewares/googleOAuthConfig');
 const {google} = require('googleapis');
 
 // API Endpoint to Start the OAuth flow
-router.get('/google-calendar', authenticateToken, (req, res) => {
+router.get('/', authenticateToken, (req, res) => {
     const url = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES,
@@ -18,7 +18,7 @@ router.get('/google-calendar', authenticateToken, (req, res) => {
 });
 
 // API Endpoint for Callback to Exchange Authorization code for Access Token
-router.post('/google-calendar/callback', authenticateToken, async (req, res) => {
+router.post('/callback', authenticateToken, async (req, res) => {
     const { code } = req.body; // Get code from the body instead of query
     try {
         const { tokens } = await oauth2Client.getToken(code);
@@ -79,7 +79,7 @@ router.get('/sync', authenticateToken, async (req, res) => {
             masterEventId: event.id
         }));
 
-        // Creates/Updates the Google Calendar Events with Prisma
+        // Creates/Updates the Google Calendar Events into Database via Prisma
         for (const event of parsedEvents) {
             try {
                 const existingEvent = await prisma.calendarEvent.findFirst({

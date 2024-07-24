@@ -1,6 +1,6 @@
 import "./CreateEvent.css"
 import { useState, useEffect } from "react";
-import { slotToTime, getTomorrowsDate } from "../../utils/utils";
+import { slotToTime, fetchRecommendations} from "../../utils/utils";
 
 function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
     const [title, setTitle]  = useState('');;
@@ -14,27 +14,6 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
     const [duration, setDuration] = useState(1);
     const [recommendations, setRecommendations] = useState([]);
 
-    const fetchRecommendations = async () => {
-        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-        const options = {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                duration,
-                invitees: participants.split(',').map(email => email.trim()).filter(email => email !== ''),
-                targetDate: getTomorrowsDate(date)
-            }),
-            credentials: 'include'
-            };
-        const response = await fetch(`${backendUrlAccess}/calendar/recommend-time-slots`, options);
-        if (!response.ok) {
-            throw new Error('Something went wrong!');
-          }
-        const data = await response.json();
-        setRecommendations(data.recommendations);
-    }
     const handleSubmit = (e) => {
         e.preventDefault();
         const startAt = new Date(`${date} ${startTime}`);
@@ -80,7 +59,7 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content">
+            <div className="modal-content-ce">
                 <form onSubmit={handleSubmit}>
                     <h1>Create a New Event</h1>
 
@@ -95,7 +74,7 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
 
                     <p>Duration</p>
                     <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="Duration in 30-min slots" min="1" />
-                    <button type="button" onClick={fetchRecommendations}>Get Recommendations</button>
+                    <button type="button" onClick={() => fetchRecommendations(setRecommendations, duration, participants, date)}>Get Recommendations</button>
                     {recommendations.length > 0 && (
                         <div>
                             <h2>Recommended Times</h2>

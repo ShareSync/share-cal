@@ -8,7 +8,7 @@ function GoogleOAuthCallback () {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         if (code) {
-            fetch('http://localhost:3000/google-cal/google-calendar/callback', {
+            fetch('http://localhost:3000/google-cal/callback', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

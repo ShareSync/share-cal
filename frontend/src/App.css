@@ -1,8 +1,3 @@
-#event-src {
-    display: flex;
-    justify-content: space-between;
-}
-
 .loading-bar {
     width: 100%;
     height: 4px;
