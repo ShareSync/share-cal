@@ -266,6 +266,27 @@ async function respondToInvitation(eventId, status){
   }
 }
 
+async function fetchRecommendations(setRecommendations, duration, participants, date) {
+  const options = {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'},
+    body: JSON.stringify({
+        duration,
+        invitees: participants.split(',').map(email => email.trim()).filter(email => email !== ''),
+        targetDate: getTomorrowsDate(date)
+    }),
+    credentials: 'include'
+  };
+  const response = await fetch(`${backendUrlAccess}/calendar/recommend-time-slots`, options);
+  if (!response.ok) {
+      throw new Error('Something went wrong!');
+    }
+  const data = await response.json();
+  setRecommendations(data.recommendations);
+}
+
 // Helper Functions
 // Converts JS Date object (Provide example) into ISO String format (Provide example) -> Specifically extracts the date
 function getDateString(date) {
@@ -320,5 +341,6 @@ export {
     handleICSParsing,
     createCalendarEvent, handleEventDelete, handleEventEdit,
     fetchInvitations, respondToInvitation,
-    getDateString, getTimeString, getReadableDateStr, getReadableTimeStr, slotToTime, getTomorrowsDate
+    getDateString, getTimeString, getReadableDateStr, getReadableTimeStr, slotToTime, getTomorrowsDate,
+    fetchRecommendations
 };

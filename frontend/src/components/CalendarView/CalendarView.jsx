@@ -64,12 +64,10 @@ function CalendarView () {
 
     // Handles Parsed Events from uploaded .ics file
     const handleParsedEvents = (parsedEvents) => {
-      setIsLoading(true);
       parsedEvents.forEach(event => {
         createCalendarEvent(event, userInfo.id, fetchCurrentUser, updateUser);
       })
       fetchCurrentUser(setIsLoading, updateUser, setEvents);
-      setIsLoading(false);
     }
 
     // Handles When Date on Calendar is clicked
@@ -105,7 +103,7 @@ function CalendarView () {
     }
 
     // Handles when New Event is Clicked
-    const newEventButton = () => {
+    const handleNewEventClick = () => {
       setInitialView({
         title: "",
         date: "",
@@ -194,7 +192,7 @@ function CalendarView () {
             <>
                 <Header />
                 <div id="event-src">
-                  <button onClick={newEventButton}>New Event</button>
+                  <button onClick={handleNewEventClick}>New Event</button>
                   <ICSUpload onEventsImported={handleParsedEvents}/>
                   <GoogleCalendarSync />
                 </div>
@@ -249,6 +247,5 @@ function CalendarView () {
             </>
     )
 }
-
 
 export default CalendarView;
