@@ -158,6 +158,58 @@ async function handleEventDelete(content, onClose, refetchEvents) {
     }
 }
 
+// API Call for Editing Events via Drag/Drop
+async function handleEventEdit(info, updateUser) {
+  try {
+    const updatedEvent = {
+      title: info.event.title,
+      startAt: info.event.startStr,
+      endAt: info.event.endStr,
+      description: info.event.extendedProps.description,
+      location: info.event.extendedProps.location,
+      allDay: info.event.allDay
+    }
+
+    // Handles for Editing Google Calendar Events
+    if (info.event.extendedProps.source === 'google'){
+      const options = {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'},
+        body: JSON.stringify({updatedEventData: updatedEvent}),
+        credentials: 'include'
+          };
+      const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+    } else { // Handles Editing for Other Event Types (Personal, ICS)
+      const options = {
+      method: 'PUT',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+      body: JSON.stringify(updatedEvent),
+      credentials: 'include'
+        };
+      const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+    }
+
+  } catch (error) {
+    console.error('Failed to update calendar event: ', error);
+    if (error.response && error.response.status === 401 ) {
+      updateUser(null);
+    }
+    throw error;
+  }
+}
+
+// TODO: API Call for Editing Events via Manual Data Entry
+
 // API Call for Uploading a .ics File for Parsing
 async function handleICSParsing(formData, onEventsImported) {
     try{
@@ -181,6 +233,7 @@ async function handleICSParsing(formData, onEventsImported) {
     }
 }
 
+// Related to Shared Events
 // API Call for Fetching Event Invitations
 async function fetchInvitations(setInvitations) {
   try {
@@ -265,7 +318,7 @@ function getTomorrowsDate(currentDateString) {
 export {
     handleSignUp, handleLogin, handleOnLogout, fetchCurrentUser,
     handleICSParsing,
-    createCalendarEvent, handleEventDelete,
+    createCalendarEvent, handleEventDelete, handleEventEdit,
     fetchInvitations, respondToInvitation,
     getDateString, getTimeString, getReadableDateStr, getReadableTimeStr, slotToTime, getTomorrowsDate
 };

@@ -10,7 +10,7 @@ import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import EventDetail from "../EventDetail/EventDetail.jsx";
 
 // Importing helper functions
-import { fetchCurrentUser, createCalendarEvent, getDateString, getTimeString } from "../../utils/utils.js";
+import { fetchCurrentUser, createCalendarEvent, handleEventEdit, getDateString, getTimeString } from "../../utils/utils.js";
 
 //Importing FullCalendar Library
 import FullCalendar from '@fullcalendar/react';
@@ -72,11 +72,7 @@ function CalendarView () {
       setIsLoading(false);
     }
 
-    useEffect(() => {
-        fetchCurrentUser(setIsLoading, updateUser, setEvents);
-      }, []);
-
-
+    // Handles When Date on Calendar is clicked
     const handleDateSelect = (info) => {
       setIsEdit(false);
       setInitialView({
@@ -86,6 +82,41 @@ function CalendarView () {
         allDay: info.allDay
       })
       setIsModalOpen(true);
+    }
+
+    // Handles Opening of Edit Event Modal
+    const handleEdit = (info) => {
+      setIsDetailModalOpen(false);
+      setIsEdit(true);
+      const editInfo = {
+        id: info.id,
+        title: info.title,
+        date: getDateString(info.start),
+        start: getTimeString(info.start),
+        end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
+        allDay: info.allDay,
+        description: info.description,
+        location: info.location,
+        source: info.source,
+        masterEventId: info.masterEventId,
+      }
+      setInitialView(editInfo);
+      setIsModalOpen(true);
+    }
+
+    // Handles when New Event is Clicked
+    const newEventButton = () => {
+      setInitialView({
+        title: "",
+        date: "",
+        start: "",
+        end: "",
+        allDay: false,
+        description: "",
+        location: ""
+      })
+      setIsModalOpen(true);
+      setIsEdit(false);
     }
 
     // Triggers Detailed View to show
@@ -105,57 +136,9 @@ function CalendarView () {
       setIsDetailModalOpen(true);
     }
 
-    // Handles Drag & Drop, Resize actions with FullCalendarUI
-    const handleEventEdit = async (info) => {
-      try {
-        const updatedEvent = {
-          title: info.event.title,
-          startAt: info.event.startStr,
-          endAt: info.event.endStr,
-          description: info.event.extendedProps.description,
-          location: info.event.extendedProps.location,
-          allDay: info.event.allDay
-        }
-        const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
-
-        // Handles for Editing Google Calendar Events
-        if (info.event.extendedProps.source === 'google'){
-          const options = {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'},
-            body: JSON.stringify({updatedEventData: updatedEvent}),
-            credentials: 'include'
-              };
-          const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
-          if (!response.ok) {
-            throw new Error('Something went wrong!');
-          }
-        } else { // Handles Editing for Other Event Types (Personal, ICS)
-          const options = {
-          method: 'PUT',
-          headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json'},
-          body: JSON.stringify(updatedEvent),
-          credentials: 'include'
-            };
-          const response = await fetch(`${backendUrlAccess}/calendar/events/${info.event.id}`, options);
-          if (!response.ok) {
-            throw new Error('Something went wrong!');
-          }
-        }
-
+    useEffect(() => {
         fetchCurrentUser(setIsLoading, updateUser, setEvents);
-      } catch (error) {
-        console.error('Failed to update calendar event: ', error);
-        if (error.response && error.response.status === 401 ) {
-          updateUser(null);
-        }
-        throw error;
-      }
-    }
+      }, []);
 
     const handleEventEditButton = async (info, id) => {
       try {
@@ -207,38 +190,6 @@ function CalendarView () {
       }
     }
 
-    const handleEdit = (info) => {
-      setIsDetailModalOpen(false);
-      setIsEdit(true);
-      const editInfo = {
-        id: info.id,
-        title: info.title,
-        date: getDateString(info.start),
-        start: getTimeString(info.start),
-        end: info.allDay ? getTimeString(info.start) : getTimeString(info.end),
-        allDay: info.allDay,
-        description: info.description,
-        location: info.location,
-        source: info.source,
-        masterEventId: info.masterEventId,
-      }
-      setInitialView(editInfo);
-      setIsModalOpen(true);
-    }
-
-    const newEventButton = () => {
-      setInitialView({
-        title: "",
-        date: "",
-        start: "",
-        end: "",
-        allDay: false,
-        description: "",
-        location: ""
-      })
-      setIsModalOpen(true);
-      setIsEdit(false);
-    }
     return (
             <>
                 <Header />
@@ -286,7 +237,7 @@ function CalendarView () {
                     selectable={true}
                     select={handleDateSelect}
                     eventClick={handleEventSelect}
-                    eventChange={handleEventEdit}
+                    eventChange={(info) => handleEventEdit(info, updateUser)}
                   />
                 </div>
                 {isDetailModalOpen && <EventDetail
