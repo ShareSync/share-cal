@@ -83,7 +83,10 @@ router.get('/sync', authenticateToken, async (req, res) => {
         for (const event of parsedEvents) {
             try {
                 const existingEvent = await prisma.calendarEvent.findFirst({
-                    where: { masterEventId: event.masterEventId }
+                    where: {
+                        masterEventId: event.masterEventId,
+                        userId: event.userId
+                    }
                 });
                 if (existingEvent) {
                     await prisma.calendarEvent.update({
@@ -152,6 +155,13 @@ router.post('/update-event/:eventId', authenticateToken, async (req, res) => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     try {
+
+        // Get current event details to obtain attendees list
+        const event = await calendar.events.get({
+            calendarId: 'primary',
+            eventId: eventId,
+        });
+
         // Call the Google Calendar API to update the event
         const response = await calendar.events.update({
             calendarId: 'primary',
@@ -168,6 +178,7 @@ router.post('/update-event/:eventId', authenticateToken, async (req, res) => {
                     timeZone: 'America/Los_Angeles'
                 },
                 location: updatedEventData.location,
+                attendees: event.data.attendees,
             },
         });
 
