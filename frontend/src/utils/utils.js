@@ -84,7 +84,8 @@ async function handleOnLogout(updateUser, navigate) {
 // API Call for Fetching Current User
 async function fetchCurrentUser(setIsLoading, updateUser, setEvents) {
   try {
-    setIsLoading(true)
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
     const backendUrlAccess = import.meta.env.VITE_BACKEND_ADDRESS;
     const response = await fetch(`${backendUrlAccess}/auth/current`, { credentials: 'include' });
 

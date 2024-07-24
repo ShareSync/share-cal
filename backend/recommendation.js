@@ -35,7 +35,6 @@ function findAvailableSlots(timeGrid, duration) {
 
 async function recommendEventSlots(userId, duration, targetDate, invitees = []) {
     try {
-        console.log(targetDate);
         // Parse the date as UTC
         const parsedDate = new Date(targetDate + 'T00:00:00Z');
         const startOfDay = new Date(parsedDate);

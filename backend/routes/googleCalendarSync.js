@@ -89,8 +89,8 @@ router.get('/sync', authenticateToken, async (req, res) => {
                     }
                 });
                 if (existingEvent) {
-                    await prisma.calendarEvent.update({
-                        where: { id: existingEvent.id },
+                    await prisma.calendarEvent.updateMany({
+                        where: { masterEventId: event.masterEventId },
                         data: {
                             title: event.title,
                             startAt: event.startAt,
@@ -187,8 +187,8 @@ router.post('/update-event/:eventId', authenticateToken, async (req, res) => {
         });
 
         if (existingEvent) {
-            const updatedEvent = await prisma.calendarEvent.update({
-                where: { id: existingEvent.id },
+            const updatedEvent = await prisma.calendarEvent.updateMany({
+                where: { masterEventId: eventId },
                 data: {
                     title: updatedEventData.title,
                     startAt: updatedEventData.startAt,
