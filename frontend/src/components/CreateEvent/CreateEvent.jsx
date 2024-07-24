@@ -75,23 +75,31 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
                     <p>Duration</p>
                     <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="Duration in 30-min slots" min="1" />
                     <button type="button" onClick={() => fetchRecommendations(setRecommendations, duration, participants, date)}>Get Recommendations</button>
-                    {recommendations.length > 0 && (
-                        <div>
-                            <h2>Recommended Times</h2>
-                            <ul>
+                    {recommendations == -1 && (
+                        <p>No available slots were found</p>
+                    )}
+                    <div className="recommended-times">
+                        {recommendations.length > 0 && (
+                            <div className="button-row">
                             {recommendations.map((rec, index) => {
                                 const startTime = slotToTime(rec);
                                 const endTime = slotToTime(rec + duration);
                                 return (
-                                    <li key={index} onClick={() => {
+                                    <button
+                                    key={index}
+                                    onClick={(e) => {
                                         setStartTime(startTime);
                                         setEndTime(endTime);
-                                    }}>{`Start: ${startTime}, End: ${endTime}`}</li>
+                                        e.preventDefault();
+                                    }}
+                                    >
+                                    {`Start: ${startTime}, End: ${endTime}`}
+                                    </button>
                                 );
-            })}
-                            </ul>
-                        </div>
-                    )}
+                            })}
+                            </div>
+                        )}
+                    </div>
 
                     <div id="all-day-section">
                         <p> All Day ?</p>

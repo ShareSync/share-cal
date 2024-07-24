@@ -35,9 +35,15 @@ function findAvailableSlots(timeGrid, duration) {
 
 async function recommendEventSlots(userId, duration, targetDate, invitees = []) {
     try {
-        const parsedDate = new Date(targetDate);
-        const startOfDay = new Date(parsedDate.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(parsedDate.setHours(23, 59, 59, 999));
+        console.log(targetDate);
+        // Parse the date as UTC
+        const parsedDate = new Date(targetDate + 'T00:00:00Z');
+        const startOfDay = new Date(parsedDate);
+        const endOfDay = new Date(parsedDate);
+
+        // Set end of day in UTC
+        endOfDay.setUTCHours(23, 59, 59, 999);
+
 
         const users = await prisma.user.findMany({
             where: {
@@ -62,24 +68,22 @@ async function recommendEventSlots(userId, duration, targetDate, invitees = []) 
 
         let timeGrid = generateTimeGrid();
         users.forEach(user => {
-            const userTimeGrid = generateTimeGrid();
             user.calendarEvents.forEach(event => {
                 if (event.status === 'accepted') {
-                    markUnavailableSlots(userTimeGrid, new Date(event.startAt), new Date(event.endAt));
+                    markUnavailableSlots(timeGrid, new Date(event.startAt), new Date(event.endAt));
                 }
             });
             for (let i = 0; i < user.preferredStartTime; i++) {
-                userTimeGrid[i].available = false;
+                timeGrid[i].available = false;
             }
-            for (let i = user.preferredEndTime; i < userTimeGrid.length; i++) {
-                userTimeGrid[i].available = false;
+            for (let i = user.preferredEndTime; i < timeGrid.length; i++) {
+                timeGrid[i].available = false;
             }
-            timeGrid = timeGrid.map((slot, index) => ({ slot: index, available: slot.available && userTimeGrid[index].available }));
         });
 
         const availableSlots = findAvailableSlots(timeGrid, duration);
         if (availableSlots.length === 0) {
-            throw new Error('No available slots found');
+            return -1;
         }
         return availableSlots;
     } catch (error) {

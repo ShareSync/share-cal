@@ -275,7 +275,7 @@ async function fetchRecommendations(setRecommendations, duration, participants, 
     body: JSON.stringify({
         duration,
         invitees: participants.split(',').map(email => email.trim()).filter(email => email !== ''),
-        targetDate: getTomorrowsDate(date)
+        targetDate: date
     }),
     credentials: 'include'
   };
