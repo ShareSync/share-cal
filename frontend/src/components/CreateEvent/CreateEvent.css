@@ -35,3 +35,16 @@
     justify-content: center;
     gap: 30px;
 }
+
+.recommended-times {
+overflow-x: auto;
+white-space: nowrap;
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    overflow-x: scroll;
+    scrollbar-width: none; /* Hides the scroll bar */
+  }
