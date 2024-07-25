@@ -224,7 +224,7 @@ function CalendarView () {
                         masterEventId: event.masterEventId,
                         source: event.source
                       },
-                      backgroundColor: event.status === 'pending' ? '#5ea0e0' : '#3688D8'
+                      backgroundColor: event.status === 'pending' ? '#5ea0e0' : '#36aad8'
                     }))}
                     headerToolbar={{
                       left:'prev,next today',

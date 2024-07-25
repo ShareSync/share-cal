@@ -65,83 +65,90 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
 
     return (
         <div className="modal-overlay">
-            <div className="modal-content-ce">
+            <div className="create-event-modal-content">
                 <form onSubmit={handleSubmit}>
-                    <h1>Create a New Event</h1>
+                    <h1>{isEdit ? "Editing Existing Event" : "Create a New Event"}</h1>
+                    <div className="scrollable-content">
+                        <p>Event Title</p>
+                        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Event Title" required/>
 
-                    <p>Event Title</p>
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Event Title" required/>
+                        <p>Event Description</p>
+                        <textarea name="description" id="notes" rows="5" value={description} onChange={(e) => setDescription(e.target.value)}/>
 
-                    <p>Event Description</p>
-                    <textarea name="description" id="notes" rows="5" value={description} onChange={(e) => setDescription(e.target.value)}/>
+                        <p>Date</p>
+                        <input type="date" placeholder="mm/dd/yyyy" value={date} onChange={(e) => setDate(e.target.value)} required/>
 
-                    <p>Date</p>
-                    <input type="date" placeholder="mm/dd/yyyy" value={date} onChange={(e) => setDate(e.target.value)} required/>
-
-                    <p>Duration</p>
-                    <input
-                        type="range"
-                        min="1"
-                        max="48"
-                        step='1'
-                        value={duration}
-                        onChange={(e) => setDuration(e.target.value)}
-                    />
-                    <p>Selected Duration: {Math.floor(duration / 2)} hour(s) {duration % 2 * 30} minute(s)</p>
-
-                    <button type="button" onClick={() => fetchRecommendations(setRecommendations, duration, participants, date)}>Get Recommendations</button>
-                    {recommendations == -1 && (
-                        <p>No available slots were found</p>
-                    )}
-                    <div className="recommended-times">
-                        {recommendations.length > 0 && (
-                            <div className="button-row">
-                            {recommendations.map((rec, index) => {
-                                console.log("Slot number", rec);
-                                const startTime = slotToTime(rec);
-                                const endTime = slotToTime(rec + duration);
-                                return (
-                                    <button
-                                    key={index}
-                                    onClick={(e) => {
-                                        setStartTime(startTime);
-                                        setEndTime(endTime);
-                                        e.preventDefault();
-                                        console.log(startTime);
-                                    }}
-                                    >
-                                    <p>{`Start: ${startTime}`}</p>
-                                    <p>{`End: ${endTime}`}</p>
-                                    </button>
-                                );
-                            })}
+                        {!allDay && (<>
+                        <div className="date-time-container">
+                            <div className="selector-obj">
+                                <p>Start Time</p>
+                                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required/>
                             </div>
+                            <div className="selector-obj">
+                                <p>End Time</p>
+                                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required/>
+                            </div>
+                        </div>
+
+                        <p>Duration</p>
+                        <input
+                            type="range"
+                            min="1"
+                            max="48"
+                            step='1'
+                            value={duration}
+                            onChange={(e) => setDuration(e.target.value)}
+                        />
+                        <p>Selected Duration: {Math.floor(duration / 2)} hour(s) {duration % 2 * 30} minute(s)</p>
+                        <div className="recommendation-button">
+                            <button type="button" onClick={() => fetchRecommendations(setRecommendations, duration, participants, date)}>Get Recommendations</button>
+                            {recommendations.length > 0 && <button onClick={(e) => {setRecommendations([]); e.preventDefault();}}>Reset</button>}
+                        </div>
+
+                        {recommendations == -1 && (
+                            <p>No available slots were found</p>
                         )}
-                    </div>
-
-                    <div id="all-day-section">
-                        <p> All Day ?</p>
-                        <input type="checkbox" checked={allDay} onChange={(e) => handleAllDayClicked(e)} />
-                    </div>
-
-                    {!allDay && <div className="date-time-container">
-                        <div className="selector-obj">
-                            <p>Start Time</p>
-                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required/>
+                        <div className="recommended-times">
+                            {recommendations.length > 0 && (
+                                <div className="button-row">
+                                {recommendations.map((rec, index) => {
+                                    const startTime = slotToTime(rec);
+                                    const endTime = slotToTime(rec + duration);
+                                    return (
+                                        <button
+                                        key={index}
+                                        onClick={(e) => {
+                                            setStartTime(startTime);
+                                            setEndTime(endTime);
+                                            e.preventDefault();
+                                        }}
+                                        >
+                                        <p>{`Start: ${startTime}`}</p>
+                                        <p>{`End: ${endTime}`}</p>
+                                        </button>
+                                    );
+                                })}
+                                </div>
+                            )}
                         </div>
-                        <div className="selector-obj">
-                            <p>End Time</p>
-                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required/>
+                    </>)}
+
+
+                        <div id="all-day-section">
+                            <p> All Day ?</p>
+                            <input type="checkbox" checked={allDay} onChange={(e) => handleAllDayClicked(e)} />
                         </div>
-                    </div>}
 
-                    <p> Event Location</p>
-                    <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Event Location"/>
 
-                    {!isEdit && <>
-                    <p>Event Participants (Comma-separated email addresses)</p>
-                    <input type="text" value={participants} onChange={(e) => setParticipants(e.target.value)} placeholder="Attendees"/>
-                    </>}
+
+                        <p> Event Location</p>
+                        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Event Location"/>
+
+                        {!isEdit && <>
+                        <p>Event Participants (Comma-separated email addresses)</p>
+                        <input type="text" value={participants} onChange={(e) => setParticipants(e.target.value)} placeholder="Attendees"/>
+                        </>}
+                    </div>
 
                     <div id="form-button">
                         <button onClick={onClose} type="button">Cancel</button>

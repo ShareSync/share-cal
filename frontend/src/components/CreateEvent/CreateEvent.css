@@ -1,5 +1,4 @@
 .modal-overlay {
-    display: block;
     position: fixed;
     z-index: 100;
     left: 0;
@@ -7,44 +6,88 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.4);
+    display: flex;
+    justify-content: center;
 }
 
-.modal-content-ce {
+.create-event-modal-content {
     backdrop-filter: blur(5px);
     background-color: white;
-    margin: 10% auto;
+    margin: auto;
     padding: 20px;
-    border-radius: 0.5em;
+    border-radius: 8px;
     width: 50%;
+    max-width: 600px;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scrollable-content {
+    overflow-y: auto;
+    max-height: 700px;
+    margin-bottom: 20px;
+    scrollbar-width: none;
+}
+
+input[type="text"], input[type="date"], input[type="time"], textarea {
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 98%;
+}
+
+input[type="range"], input[type='checkbox'] {
+    cursor: pointer;
+}
+
+.create-event-modal-content button {
+    padding: 10px 20px;
+    background-color: #36aad8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.create-event-modal-content button:hover {
+    background-color: #1c8ab5;
+}
+
+.date-time-container, #all-day-section {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .date-time-container {
-    display: flex;
-    gap: 10px;
-}
-
-#all-day-section {
-    display: flex;
+    justify-content: space-around;
 }
 
 #form-button {
-    margin-top: 10px;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     gap: 30px;
 }
 
+
+.recommendation-button{
+    display: flex;
+    gap: 10px;
+}
 .recommended-times {
-overflow-x: auto;
-white-space: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    margin-top: 10px;
 }
 
 .button-row {
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-between;
+    gap: 10px;
     overflow-x: scroll;
-    scrollbar-width: none; /* Hides the scroll bar */
+    scrollbar-width: none;
   }

@@ -1,14 +1,4 @@
-.modal-overlay {
-    display: block;
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.4);
-    overflow: auto;
-}
+/* Modal Overlay styling rule obtained from CreateEvent.css */
 
 .modal-content {
     backdrop-filter: blur(5px);
