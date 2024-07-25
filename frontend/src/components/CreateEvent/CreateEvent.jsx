@@ -16,26 +16,32 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const startAt = new Date(`${date} ${startTime}`);
-        const endAt = new Date(`${date} ${endTime}`)
-        const eventData ={
-            title: title,
-            description: description,
-            startAt: startAt,
-            endAt: endAt,
-            location: location,
-            allDay: allDay,
-            invitees: participants
-            ? participants.split(',').map(email => email.trim()).filter(email => email !== '')
-            : [],
-            source: initialView.source,
-            masterEventId: initialView.masterEventId
-        };
-        if (isEdit){
-            onEdit(eventData, initialView.id);
-        }
-        else{
-            onCreate(eventData);
+        if (startTime >= endTime){
+            alert('Invalid time entered');
+            return;
+        } else {
+
+            const startAt = new Date(`${date} ${startTime}`);
+            const endAt = new Date(`${date} ${endTime}`)
+            const eventData ={
+                title: title,
+                description: description,
+                startAt: startAt,
+                endAt: endAt,
+                location: location,
+                allDay: allDay,
+                invitees: participants
+                ? participants.split(',').map(email => email.trim()).filter(email => email !== '')
+                : [],
+                source: initialView.source,
+                masterEventId: initialView.masterEventId
+            };
+            if (isEdit){
+                onEdit(eventData, initialView.id);
+            }
+            else{
+                onCreate(eventData);
+            }
         }
     }
 
@@ -73,7 +79,16 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
                     <input type="date" placeholder="mm/dd/yyyy" value={date} onChange={(e) => setDate(e.target.value)} required/>
 
                     <p>Duration</p>
-                    <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="Duration in 30-min slots" min="1" />
+                    <input
+                        type="range"
+                        min="1"
+                        max="48"
+                        step='1'
+                        value={duration}
+                        onChange={(e) => setDuration(e.target.value)}
+                    />
+                    <p>Selected Duration: {Math.floor(duration / 2)} hour(s) {duration % 2 * 30} minute(s)</p>
+
                     <button type="button" onClick={() => fetchRecommendations(setRecommendations, duration, participants, date)}>Get Recommendations</button>
                     {recommendations == -1 && (
                         <p>No available slots were found</p>
@@ -82,6 +97,7 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
                         {recommendations.length > 0 && (
                             <div className="button-row">
                             {recommendations.map((rec, index) => {
+                                console.log("Slot number", rec);
                                 const startTime = slotToTime(rec);
                                 const endTime = slotToTime(rec + duration);
                                 return (
@@ -91,9 +107,11 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
                                         setStartTime(startTime);
                                         setEndTime(endTime);
                                         e.preventDefault();
+                                        console.log(startTime);
                                     }}
                                     >
-                                    {`Start: ${startTime}, End: ${endTime}`}
+                                    <p>{`Start: ${startTime}`}</p>
+                                    <p>{`End: ${endTime}`}</p>
                                     </button>
                                 );
                             })}
@@ -121,7 +139,7 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
                     <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Event Location"/>
 
                     {!isEdit && <>
-                    <p>Event Participants</p>
+                    <p>Event Participants (Comma-separated email addresses)</p>
                     <input type="text" value={participants} onChange={(e) => setParticipants(e.target.value)} placeholder="Attendees"/>
                     </>}
 

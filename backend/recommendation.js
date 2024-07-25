@@ -10,8 +10,13 @@ function generateTimeGrid() {
 }
 
 function markUnavailableSlots(timeGrid, startAt, endAt) {
+    // For both startAt & endAt, the times are converted to numerical values to represent 30 mins interval time slots
+    // Such that each hour is represented by 2 time slots, and every 30 minutes is represented by 1 time slot
+    // Math.floor is used for startSlot to round down to the nearest slot.
+    // Math.ceil is used for endSlot to round up to ensure coverage of the end time.
     const startSlot = Math.floor(startAt.getHours() * 2 + startAt.getMinutes() / 30);
     const endSlot = Math.ceil(endAt.getHours() * 2 + endAt.getMinutes() / 30);
+
     for (let i = startSlot; i < endSlot; i++) {
         timeGrid[i].available = false;
     }
