@@ -4,16 +4,21 @@ const prisma = new PrismaClient();
 function generateTimeGrid() {
     const timeGrid = [];
     for (let i = 0; i < 48; i++) {
-        timeGrid.push({ slot: i, available: true });
+        timeGrid.push(true);
     }
     return timeGrid;
 }
 
 function markUnavailableSlots(timeGrid, startAt, endAt) {
+    // For both startAt & endAt, the times are converted to numerical values to represent 30 mins interval time slots
+    // Such that each hour is represented by 2 time slots, and every 30 minutes is represented by 1 time slot
+    // Math.floor is used for startSlot to round down to the nearest slot.
+    // Math.ceil is used for endSlot to round up to ensure coverage of the end time.
     const startSlot = Math.floor(startAt.getHours() * 2 + startAt.getMinutes() / 30);
     const endSlot = Math.ceil(endAt.getHours() * 2 + endAt.getMinutes() / 30);
+
     for (let i = startSlot; i < endSlot; i++) {
-        timeGrid[i].available = false;
+        timeGrid[i] = false;
     }
 }
 
@@ -21,7 +26,7 @@ function findAvailableSlots(timeGrid, duration) {
     const availableSlots = [];
     let consecutiveSlots = 0;
     for (let i = 0; i < timeGrid.length; i++) {
-        if (timeGrid[i].available) {
+        if (timeGrid[i]) {
             consecutiveSlots++;
             if (consecutiveSlots >= duration) {
                 availableSlots.push(i - duration + 1);
@@ -73,10 +78,10 @@ async function recommendEventSlots(userId, duration, targetDate, invitees = []) 
                 }
             });
             for (let i = 0; i < user.preferredStartTime; i++) {
-                timeGrid[i].available = false;
+                timeGrid[i] = false;
             }
             for (let i = user.preferredEndTime; i < timeGrid.length; i++) {
-                timeGrid[i].available = false;
+                timeGrid[i]= false;
             }
         });
 
