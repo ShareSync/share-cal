@@ -129,10 +129,10 @@ const createCalendarEvent = async (calendarEvent, userId, fetchCurrentUser, upda
       fetchCurrentUser();
     } catch (error) {
       console.error('Failed to create new calendar event: ', error);
+      alert(error.message);
       if (error.response && error.response.status === 401 ) {
         updateUser(null);
       }
-      throw error;
     }
   };
 
