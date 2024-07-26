@@ -212,8 +212,6 @@ async function handleEventEdit(info, updateUser) {
   }
 }
 
-// TODO: API Call for Editing Events via Manual Data Entry
-
 // API Call for Uploading a .ics File for Parsing
 async function handleICSParsing(formData, onEventsImported) {
     try{
@@ -248,7 +246,6 @@ async function fetchInvitations(setInvitations) {
     console.error('Error fetching invitations:', error);
     if (error.response && error.response.status === 401 ) {
       alert('You have been logged out');
-      // updateUser(null);
     }
   }
 }
@@ -326,8 +323,6 @@ function getTimeString(date) {
 }
 
 // Converts JS DateTime object (provide exmaple) into readable time format (9:00 AM)
-// TODO: fix issue with 12th hour (either midnight or noon) not being shown properly
-//       currently shows as 0:00 PM, 0:30 AM, etc.
 function getReadableTimeStr(dateTime) {
     const hours = dateTime.getHours();
     const minutes = dateTime.getMinutes();
