@@ -28,6 +28,7 @@ function LoginForm (){
         <div id="login-form">
             <form>
                 <h1>Login</h1>
+                <div className="form-group"></div>
                 <p>Email Address</p>
                 <input type="email" required placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
                 <p>Password</p>

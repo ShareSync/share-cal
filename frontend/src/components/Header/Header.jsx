@@ -1,5 +1,5 @@
 import "./Header.css"
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import { UserContext } from '../../UserContext.js';
 import { handleOnLogout } from "../../utils/utils.js"
 import { useNavigate } from 'react-router-dom';
@@ -14,8 +14,8 @@ function Header () {
                 <img id="app-logo" src="/logo.jpg" alt="logo" />
                 <h1>ShareCal</h1>
             </div>
-            <button onClick={() => navigate(`/shared-events`)}>Shared Events</button>
-            <button onClick={() => handleOnLogout(updateUser, navigate)}>Log out</button>
+            <button className='header-button' onClick={() => navigate(`/shared-events`)}>Shared Events</button>
+            <button className='header-button' onClick={() => handleOnLogout(updateUser, navigate)}>Log out</button>
         </div>
     )
 }
