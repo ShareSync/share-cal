@@ -70,6 +70,13 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
         }
     }, [initialView]);
 
+    useEffect(() => {
+        if (startTime) {
+            const start = new Date(`${date} ${startTime}`);
+            const newEnd = new Date(start.getTime() + duration * 30 * 60000);
+            setEndTime(newEnd.toTimeString().slice(0, 5));
+        }
+    }, [duration])
     return (
         <div className="modal-overlay">
             <div className="create-event-modal-content">
