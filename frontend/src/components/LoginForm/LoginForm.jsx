@@ -4,6 +4,7 @@ import { UserContext } from '../../UserContext.js';
 import { useState, useContext } from "react";
 import { handleLogin } from "../../utils/utils.js";
 
+
 function LoginForm (){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -27,14 +28,11 @@ function LoginForm (){
         <div id="login-form">
             <form>
                 <h1>Login</h1>
-                <div className="form-group">
-                    <label>Email Address</label>
-                    <input type="email" required placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
-                </div>
-                <div className="form-group">
-                    <label>Password</label>
-                    <input type="password" required onChange={(e) => setPassword(e.target.value)} value={password}/>
-                </div>
+                <div className="form-group"></div>
+                <p>Email Address</p>
+                <input type="email" required placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
+                <p>Password</p>
+                <input type="password" required onChange={(e) => setPassword(e.target.value)} value={password}/>
                 <button onClick={(e) => handleOnSubmit(e)}>Login</button>
                 <p>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
             </form>
