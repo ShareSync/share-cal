@@ -50,7 +50,8 @@ async function handleLogin(userObj, updateUser, navigate) {
         });
 
         if (!response.ok) {
-          throw new Error('Login failed');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Login failed');
         }
 
         const data = await response.json();
@@ -60,7 +61,7 @@ async function handleLogin(userObj, updateUser, navigate) {
         navigate('/');
     } catch (error) {
         console.error('Error logging in:', error.message);
-        alert("Unsuccessful login attempt. Try again.");
+        alert(error.message);
     }
 }
 
@@ -203,6 +204,7 @@ async function handleEventEdit(info, updateUser) {
     console.error('Failed to update calendar event: ', error);
     if (error.response && error.response.status === 401 ) {
       updateUser(null);
+      alert('You have been logged out')
     }
     throw error;
   }
@@ -242,6 +244,10 @@ async function fetchInvitations(setInvitations) {
       setInvitations(data);
   } catch (error) {
     console.error('Error fetching invitations:', error);
+    if (error.response && error.response.status === 401 ) {
+      alert('You have been logged out');
+      // updateUser(null);
+    }
   }
 }
 
