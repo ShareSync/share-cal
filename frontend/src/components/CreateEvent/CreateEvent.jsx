@@ -61,8 +61,22 @@ function CreateEvent ({onClose, onCreate, onEdit, initialView, isEdit}) {
         setAllDay(initialView.allDay)
         setLocation(initialView.location);
         setDescription(initialView.description);
-    }, []);
 
+        if (initialView.start && initialView.end) {
+            const start = new Date(`${initialView.date} ${initialView.start}`);
+            const end = new Date(`${initialView.date} ${initialView.end}`);
+            const durationInMinutes = (end - start) / 60000; setDuration(durationInMinutes / 30);
+            setDuration(durationInMinutes / 30);
+        }
+    }, [initialView]);
+
+    useEffect(() => {
+        if (startTime) {
+            const start = new Date(`${date} ${startTime}`);
+            const newEnd = new Date(start.getTime() + duration * 30 * 60000);
+            setEndTime(newEnd.toTimeString().slice(0, 5));
+        }
+    }, [duration])
     return (
         <div className="modal-overlay">
             <div className="create-event-modal-content">
