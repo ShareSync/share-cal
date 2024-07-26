@@ -183,7 +183,8 @@ async function handleEventEdit(info, updateUser) {
           };
       const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
       if (!response.ok) {
-        throw new Error('Something went wrong!');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update Google Calendar event');
       }
     } else { // Handles Editing for Other Event Types (Personal, ICS)
       const options = {
@@ -202,6 +203,7 @@ async function handleEventEdit(info, updateUser) {
 
   } catch (error) {
     console.error('Failed to update calendar event: ', error);
+    alert(error.message);
     if (error.response && error.response.status === 401 ) {
       updateUser(null);
       alert('You have been logged out')
@@ -266,9 +268,15 @@ async function respondToInvitation(eventId, status){
       credentials: 'include'
         };
     const response = await fetch(`${backendUrlAccess}/calendar/events/${eventId}/respond`, options);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'There was an issue with responding to event invite');
+    }
     const data = await response.json();
   } catch (error) {
     console.error('Error responding to invitation:', error);
+    alert(error.message);
   }
 }
 
