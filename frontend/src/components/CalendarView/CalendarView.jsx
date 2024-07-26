@@ -8,6 +8,8 @@ import ICSUpload from "../ICSUpload/ICSUpload.jsx";
 import GoogleCalendarSync from "../GoogleCalendarSync/GoogleCalendarSync.jsx";
 import CreateEvent from "../CreateEvent/CreateEvent.jsx";
 import EventDetail from "../EventDetail/EventDetail.jsx";
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
 // Importing helper functions
 import { fetchCurrentUser, createCalendarEvent, handleEventEdit, getDateString, getTimeString } from "../../utils/utils.js";
@@ -188,6 +190,13 @@ function CalendarView () {
       }
     }
 
+    const handleEventMouseEnter = (info) => {
+      tippy(info.el, {
+        content: info.event.title,
+        placement: 'top'
+      })
+    }
+
     return (
             <>
                 <Header />
@@ -236,6 +245,7 @@ function CalendarView () {
                     select={handleDateSelect}
                     eventClick={handleEventSelect}
                     eventChange={(info) => handleEventEdit(info, updateUser)}
+                    eventMouseEnter={handleEventMouseEnter}
                   />
                 </div>
                 {isDetailModalOpen && <EventDetail

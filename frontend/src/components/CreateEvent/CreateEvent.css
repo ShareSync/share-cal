@@ -35,7 +35,7 @@ input[type="text"], input[type="date"], input[type="time"], textarea {
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: 98%;
+    width: 97%;
 }
 
 input[type="range"], input[type='checkbox'] {
