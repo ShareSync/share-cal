@@ -162,6 +162,11 @@ router.post('/update-event/:eventId', authenticateToken, async (req, res) => {
             eventId: eventId,
         });
 
+        // Checks to see if user has edit permissions
+        if (!event.data.organizer.self) {
+            return res.status(403).json({ error: 'You do not have permission to edit this event'});
+        }
+
         // Call the Google Calendar API to update the event
         const response = await calendar.events.update({
             calendarId: 'primary',

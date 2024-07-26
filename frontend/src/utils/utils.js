@@ -50,7 +50,8 @@ async function handleLogin(userObj, updateUser, navigate) {
         });
 
         if (!response.ok) {
-          throw new Error('Login failed');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Login failed');
         }
 
         const data = await response.json();
@@ -60,7 +61,7 @@ async function handleLogin(userObj, updateUser, navigate) {
         navigate('/');
     } catch (error) {
         console.error('Error logging in:', error.message);
-        alert("Unsuccessful login attempt. Try again.");
+        alert(error.message);
     }
 }
 
@@ -128,10 +129,10 @@ const createCalendarEvent = async (calendarEvent, userId, fetchCurrentUser, upda
       fetchCurrentUser();
     } catch (error) {
       console.error('Failed to create new calendar event: ', error);
+      alert(error.message);
       if (error.response && error.response.status === 401 ) {
         updateUser(null);
       }
-      throw error;
     }
   };
 
@@ -182,7 +183,8 @@ async function handleEventEdit(info, updateUser) {
           };
       const response = await fetch(`${backendUrlAccess}/google-cal/update-event/${info.event.extendedProps.masterEventId}`, options);
       if (!response.ok) {
-        throw new Error('Something went wrong!');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update Google Calendar event');
       }
     } else { // Handles Editing for Other Event Types (Personal, ICS)
       const options = {
@@ -201,14 +203,14 @@ async function handleEventEdit(info, updateUser) {
 
   } catch (error) {
     console.error('Failed to update calendar event: ', error);
+    alert(error.message);
     if (error.response && error.response.status === 401 ) {
       updateUser(null);
+      alert('You have been logged out')
     }
     throw error;
   }
 }
-
-// TODO: API Call for Editing Events via Manual Data Entry
 
 // API Call for Uploading a .ics File for Parsing
 async function handleICSParsing(formData, onEventsImported) {
@@ -242,6 +244,9 @@ async function fetchInvitations(setInvitations) {
       setInvitations(data);
   } catch (error) {
     console.error('Error fetching invitations:', error);
+    if (error.response && error.response.status === 401 ) {
+      alert('You have been logged out');
+    }
   }
 }
 
@@ -260,31 +265,43 @@ async function respondToInvitation(eventId, status){
       credentials: 'include'
         };
     const response = await fetch(`${backendUrlAccess}/calendar/events/${eventId}/respond`, options);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'There was an issue with responding to event invite');
+    }
     const data = await response.json();
   } catch (error) {
     console.error('Error responding to invitation:', error);
+    alert(error.message);
   }
 }
 
 async function fetchRecommendations(setRecommendations, duration, participants, date) {
-  const options = {
-    method: 'POST',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'},
-    body: JSON.stringify({
-        duration,
-        invitees: participants.split(',').map(email => email.trim()).filter(email => email !== ''),
-        targetDate: date
-    }),
-    credentials: 'include'
-  };
-  const response = await fetch(`${backendUrlAccess}/calendar/recommend-time-slots`, options);
-  if (!response.ok) {
-      throw new Error('Something went wrong!');
-    }
-  const data = await response.json();
-  setRecommendations(data.recommendations);
+  try {
+    const options = {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'},
+      body: JSON.stringify({
+          duration,
+          invitees: participants.split(',').map(email => email.trim()).filter(email => email !== ''),
+          targetDate: date
+      }),
+      credentials: 'include'
+    };
+    const response = await fetch(`${backendUrlAccess}/calendar/recommend-time-slots`, options);
+    if (!response.ok) {
+      const errorData = await response.json();
+        throw new Error(errorData.error || 'Error generating recommendations');
+      }
+    const data = await response.json();
+    setRecommendations(data.recommendations);
+  } catch (error) {
+    console.error('Error generating recommendations');
+    alert(error.message);
+  }
 }
 
 // Helper Functions
@@ -306,8 +323,6 @@ function getTimeString(date) {
 }
 
 // Converts JS DateTime object (provide exmaple) into readable time format (9:00 AM)
-// TODO: fix issue with 12th hour (either midnight or noon) not being shown properly
-//       currently shows as 0:00 PM, 0:30 AM, etc.
 function getReadableTimeStr(dateTime) {
     const hours = dateTime.getHours();
     const minutes = dateTime.getMinutes();
