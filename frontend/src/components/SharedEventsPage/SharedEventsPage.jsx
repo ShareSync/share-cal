@@ -15,18 +15,22 @@ function SharedEventsPage () {
         setInvitations(invitations.filter(invite => invite.id !== eventId));
     }
     return (
-        <div>
+        <div className="shared-events-container">
             <Header />
-            <h2>Here are the events that have been shared with you</h2>
-            <ul>
-                {invitations.map(invite => (
-                    <li key={invite.id}>
-                        <p>{invite.title}</p>
-                        <button onClick={() => handleInvitationResponse(invite.id, 'accepted')}>Accept</button>
-                        <button onClick={() => handleInvitationResponse(invite.id, 'declined')}>Decline</button>
-                    </li>
-                ))}
-            </ul>
+            <div className="shared-events-content">
+                <h2>Here are the events that have been shared with you</h2>
+                <ul className="invitations-list">
+                    {invitations.map(invite => (
+                        <li key={invite.id} className="invitation-item">
+                            <p className="event-title">{invite.title}</p>
+                            <div className="invitation-buttons">
+                                <button className="accept-button" onClick={() => handleInvitationResponse(invite.id, 'accepted')}>Accept</button>
+                                <button className="decline-button" onClick={() => handleInvitationResponse(invite.id, 'declined')}>Decline</button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </div>
     )
 }
