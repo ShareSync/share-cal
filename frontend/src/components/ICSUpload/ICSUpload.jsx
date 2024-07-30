@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import { handleICSParsing } from '../../utils/utils';
+import './ICSUpload.css'
 
 const ICSUpload = ({onEventsImported}) => {
     const [file, setFile] = useState(null);
@@ -18,7 +19,7 @@ const ICSUpload = ({onEventsImported}) => {
     };
 
     return (
-        <div>
+        <div className='ics-upload'>
             <h2> Import Events from ICS FIle</h2>
             <form onSubmit={handleSubmit}>
                 <input type="file" accept=".ics" onChange={(e) => setFile(e.target.files[0])} />

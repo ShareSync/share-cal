@@ -1,0 +1,39 @@
+.ics-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.ics-upload h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.ics-upload form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ics-upload input[type="file"] {
+    margin-bottom: 1rem;
+}
+
+.ics-upload button {
+    background-color: #3688D8;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.ics-upload button:hover {
+    background-color: #2a6ba6;
+}

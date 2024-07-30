@@ -19,17 +19,19 @@ function SharedEventsPage () {
             <Header />
             <div className="shared-events-content">
                 <h2>Here are the events that have been shared with you</h2>
-                <ul className="invitations-list">
-                    {invitations.map(invite => (
-                        <li key={invite.id} className="invitation-item">
-                            <p className="event-title">{invite.title}</p>
-                            <div className="invitation-buttons">
-                                <button className="accept-button" onClick={() => handleInvitationResponse(invite.id, 'accepted')}>Accept</button>
-                                <button className="decline-button" onClick={() => handleInvitationResponse(invite.id, 'declined')}>Decline</button>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+                <div className="scrollable">
+                    <ul className="invitations-list">
+                        {invitations.map(invite => (
+                            <li key={invite.id} className="invitation-item">
+                                <p className="event-title">{invite.title}</p>
+                                <div className="invitation-buttons">
+                                    <button className="accept-button" onClick={() => handleInvitationResponse(invite.id, 'accepted')}>Accept</button>
+                                    <button className="decline-button" onClick={() => handleInvitationResponse(invite.id, 'declined')}>Decline</button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
     )

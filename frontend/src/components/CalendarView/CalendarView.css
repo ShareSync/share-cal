@@ -1,6 +1,24 @@
 #event-src {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+}
+
+#event-src button {
+    background-color: #3688D8;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#event-src button:hover {
+    background-color: #2a6ba6;
 }
 
 .loading-bar {

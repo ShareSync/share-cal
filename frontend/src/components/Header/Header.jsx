@@ -11,7 +11,7 @@ function Header () {
     return (
         <div id ="header">
             <div id='header-logo' onClick={() => navigate(`/`)}>
-                <img id="app-logo" src="/logo.jpg" alt="logo" />
+                <img id="app-logo" src="/favicon.jpg" alt="logo" />
                 <h1>ShareCal</h1>
             </div>
             <button className='header-button' onClick={() => navigate(`/shared-events`)}>Shared Events</button>
