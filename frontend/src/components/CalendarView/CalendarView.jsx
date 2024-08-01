@@ -216,7 +216,7 @@ function CalendarView () {
                 {isLoading && <div className="loading-bar"></div>}
                 <div id="calendar-view">
                   <FullCalendar
-                    height={"70vh"}
+                    height={"65vh"}
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     initialView="timeGridWeek"
                     nowIndicator='true'

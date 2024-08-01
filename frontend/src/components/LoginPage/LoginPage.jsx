@@ -3,16 +3,16 @@ import LoginForm from "../LoginForm/LoginForm"
 
 function LoginPage () {
     return (
-        <>
-            <div id="main-container">
+        <div className="login-page">
+            <div className="main-container">
                 <LoginForm />
-                <div>
-                    <img height="100px;" src="/logo.jpg" alt="logo"/>
+                <div className="logo-container">
+                    <img height="100px;" src="/favicon.jpg" alt="logo"/>
                     <h1>ShareCal</h1>
                 </div>
             </div>
 
-        </>
+        </div>
     )
 }
 

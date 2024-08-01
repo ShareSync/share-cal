@@ -25,14 +25,17 @@ function LoginForm (){
       };
 
     return(
-        <div id="login-form">
+        <div className="login-form">
             <form>
                 <h1>Login</h1>
-                <div className="form-group"></div>
-                <p>Email Address</p>
-                <input type="email" required placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
-                <p>Password</p>
-                <input type="password" required onChange={(e) => setPassword(e.target.value)} value={password}/>
+                <div className="form-group">
+                  <p>Email Address</p>
+                  <input type="email" required placeholder="johndoe@email.com" onChange={(e) => setEmail(e.target.value)} value={email}/>
+                </div>
+                <div className="form-group">
+                  <p>Password</p>
+                  <input type="password" required onChange={(e) => setPassword(e.target.value)} value={password}/>
+                </div>
                 <button onClick={(e) => handleOnSubmit(e)}>Login</button>
                 <p>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
             </form>
