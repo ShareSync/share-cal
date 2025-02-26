@@ -22,7 +22,7 @@
 - 🔗 **APIs:** Google Calendar API (for syncing events)  
 - 🔐 **Authentication:** JWT-based authentication  
 
-## **Demo & Screenshots**  
+## **Demo**  
 📺 **Watch the Demo:** [YouTube Video](https://youtu.be/ZkycKe2C5_s)
 
 ## **About the Developer**  
